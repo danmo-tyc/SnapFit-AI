@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useCallback, useRef } from "react"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -64,8 +65,15 @@ const defaultAIConfig: AIConfig = {
 export default function SettingsPage() {
   const { toast } = useToast()
   const t = useTranslation('settings')
+  const searchParams = useSearchParams()
   const [userProfile, setUserProfile] = useLocalStorage("userProfile", defaultUserProfile)
   const [aiConfig, setAIConfig] = useLocalStorage<AIConfig>("aiConfig", defaultAIConfig)
+
+  // 获取URL参数中的tab值，默认为profile
+  const [activeTab, setActiveTab] = useState(() => {
+    const tabParam = searchParams.get('tab')
+    return ['profile', 'goals', 'ai', 'data'].includes(tabParam || '') ? tabParam : 'profile'
+  })
 
   const { clearAllData } = useIndexedDB("healthLogs")
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -371,6 +379,9 @@ export default function SettingsPage() {
       linkElement.setAttribute("download", exportFileDefaultName)
       linkElement.click()
 
+      // 记录导出时间
+      localStorage.setItem('lastExportTime', new Date().toISOString())
+
       toast({
         title: t('data.exportSuccessTitle'),
         description: t('data.exportSuccessDescription'),
@@ -524,7 +535,7 @@ export default function SettingsPage() {
     <div className="container mx-auto py-6 max-w-8xl">
       <h1 className="text-3xl font-bold mb-6">{t('title')}</h1>
 
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile">{t('tabs.profile')}</TabsTrigger>
           <TabsTrigger value="goals">{t('tabs.goals')}</TabsTrigger>

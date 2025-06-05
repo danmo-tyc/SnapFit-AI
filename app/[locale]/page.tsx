@@ -5,7 +5,8 @@ import type React from "react"
 import { useState, useEffect, useRef, use } from "react"
 import { format } from "date-fns"
 import { zhCN, enUS } from "date-fns/locale"
-import { CalendarIcon, X, ImageIcon, Brain, ClipboardPenLine, Utensils, Dumbbell, Weight, Activity, AlertCircle, CheckCircle2, Info, Settings2, UploadCloud, Trash2, Edit3, TrendingUp, TrendingDown, Sigma, Flame, BedDouble, Target, PieChart, ListChecks, Sparkles, Save, CalendarDays, UserCheck } from "lucide-react"
+import Link from "next/link"
+import { CalendarIcon, X, ImageIcon, Brain, ClipboardPenLine, Utensils, Dumbbell, Weight, Activity, AlertCircle, CheckCircle2, Info, Settings2, UploadCloud, Trash2, Edit3, TrendingUp, TrendingDown, Sigma, Flame, BedDouble, Target, PieChart, ListChecks, Sparkles, Save, CalendarDays, UserCheck, AlertTriangle, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -23,6 +24,7 @@ import { ManagementCharts } from "@/components/management-charts"
 import { SmartSuggestions } from "@/components/smart-suggestions"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useIndexedDB } from "@/hooks/use-indexed-db"
+import { useExportReminder } from "@/hooks/use-export-reminder"
 import { compressImage } from "@/lib/image-utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -95,6 +97,9 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
 
   // 使用 IndexedDB 钩子获取日志数据
   const { getData: getDailyLog, saveData: saveDailyLog, isLoading } = useIndexedDB("healthLogs")
+
+  // 使用导出提醒Hook
+  const exportReminder = useExportReminder()
 
   const [dailyLog, setDailyLog] = useState<DailyLog>(() => ({
     date: format(selectedDate, "yyyy-MM-dd"),
@@ -853,26 +858,60 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
               </div>
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full sm:w-[280px] justify-start text-left font-normal text-base h-12"
-                  >
-                    <CalendarDays className="mr-3 h-5 w-5 text-primary" />
-                    {format(selectedDate, "PPP (eeee)", { locale: currentLocale })}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date) => date && setSelectedDate(date)}
-                    initialFocus
-                    locale={currentLocale}
-                  />
-                </PopoverContent>
-              </Popover>
+              <div className="flex flex-col gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full sm:w-[280px] justify-start text-left font-normal text-base h-12"
+                    >
+                      <CalendarDays className="mr-3 h-5 w-5 text-primary" />
+                      {format(selectedDate, "PPP (eeee)", { locale: currentLocale })}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => date && setSelectedDate(date)}
+                      initialFocus
+                      locale={currentLocale}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground">
+                    <Settings2 className="h-3 w-3" />
+                    <Link
+                      href={`/${resolvedParams.locale}/settings?tab=ai`}
+                      className="hover:text-primary transition-colors underline-offset-2 hover:underline"
+                    >
+                      {t('ui.quickConfig')}
+                    </Link>
+                    <span>/</span>
+                    <Link
+                      href={`/${resolvedParams.locale}/settings?tab=data`}
+                      className="hover:text-primary transition-colors underline-offset-2 hover:underline"
+                    >
+                      {t('ui.dataExport')}
+                    </Link>
+                  </div>
+
+                  {/* 导出提醒 */}
+                  {exportReminder.shouldRemind && exportReminder.hasEnoughData && (
+                    <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-md border border-amber-200 dark:border-amber-800">
+                      <AlertTriangle className="h-3 w-3" />
+                      <span>
+                        {exportReminder.lastExportDate === null
+                          ? t('ui.neverExported')
+                          : t('ui.exportReminder', { days: exportReminder.daysSinceLastExport })
+                        }
+                      </span>
+                      <Clock className="h-3 w-3 ml-1" />
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1189,6 +1228,15 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
               onRefresh={() => generateSmartSuggestions(dailyLog.date)}
               currentDate={dailyLog.date}
             />
+          </div>
+        </div>
+
+        {/* 免责声明 */}
+        <div className="mt-12 pt-6 border-t border-slate-200/50 dark:border-slate-700/50">
+          <div className="text-center">
+            <p className="text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
+              本应用基于AI技术，仅为您提供健康管理参考。请注意：AI分析可能存在偏差，特别是营养数据方面。您的健康很重要，在做出重要的饮食或运动决策前，建议咨询专业的医生、营养师或健身教练。
+            </p>
           </div>
         </div>
       </div>

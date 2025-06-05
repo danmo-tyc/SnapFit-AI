@@ -118,7 +118,11 @@
       "myExercise": "My Exercise",
       "todayExerciseCount": "Recorded {count} exercise items today",
       "noExerciseRecords": "No exercise records",
-      "addExerciseAbove": "Please add your today's workout above"
+      "addExerciseAbove": "Please add your today's workout above",
+      "quickConfig": "Quick Config",
+      "dataExport": "Data Export",
+      "neverExported": "Backup recommended",
+      "exportReminder": "{days} days since backup"
     },
     "activityLevels": {
       "sedentary": "Sedentary (Office work)",

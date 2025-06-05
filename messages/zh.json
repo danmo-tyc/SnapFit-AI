@@ -118,7 +118,11 @@
       "myExercise": "我的运动",
       "todayExerciseCount": "今日共记录 {count} 项运动",
       "noExerciseRecords": "暂无运动记录",
-      "addExerciseAbove": "请在上方添加您今天的锻炼"
+      "addExerciseAbove": "请在上方添加您今天的锻炼",
+      "quickConfig": "快速配置",
+      "dataExport": "数据导出",
+      "neverExported": "建议备份数据",
+      "exportReminder": "已{days}天未备份"
     },
     "activityLevels": {
       "sedentary": "久坐不动 (办公室工作)",
