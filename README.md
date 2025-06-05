@@ -7,6 +7,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/Feather-2/SnapFit-AI?style=social)](https://github.com/Feather-2/SnapFit-AI/network/members)
 
 ---
+![1749089248648](https://github.com/user-attachments/assets/fe137e38-7187-4850-b88a-abb1dff22fa8)
 
 ## 引言
 
@@ -61,6 +62,7 @@ SnapFit-AI 旨在通过一套直观而强大的工具赋能用户：
 [![GitHub forks](https://img.shields.io/github/forks/Feather-2/SnapFit-AI?style=social)](https://github.com/Feather-2/SnapFit-AI/network/members)
 
 ---
+![1749089240229](https://github.com/user-attachments/assets/0ea6aa2a-8dcd-4a7f-bdca-81511c6b79d3)
 
 ## Introduction
 
