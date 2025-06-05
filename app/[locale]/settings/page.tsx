@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -62,7 +62,7 @@ const defaultAIConfig: AIConfig = {
   },
 }
 
-export default function SettingsPage() {
+function SettingsContent() {
   const { toast } = useToast()
   const t = useTranslation('settings')
   const searchParams = useSearchParams()
@@ -968,5 +968,20 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-6 max-w-8xl">
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">加载设置...</p>
+        </div>
+      </div>
+    </div>}>
+      <SettingsContent />
+    </Suspense>
   )
 }
