@@ -26,6 +26,7 @@ import { DailyStatusCard } from "@/components/DailyStatusCard"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useIndexedDB } from "@/hooks/use-indexed-db"
 import { useExportReminder } from "@/hooks/use-export-reminder"
+import { useDateRecords } from "@/hooks/use-date-records"
 import { compressImage } from "@/lib/image-utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -102,6 +103,9 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
 
   // 使用导出提醒Hook
   const exportReminder = useExportReminder()
+
+  // 使用日期记录检查Hook
+  const { hasRecord, refreshRecords } = useDateRecords()
 
   const [dailyLog, setDailyLog] = useState<DailyLog>(() => ({
     date: format(selectedDate, "yyyy-MM-dd"),
@@ -615,6 +619,8 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
       saveDailyLog(updatedLog.date, updatedLog)
       // 触发图表刷新
       setChartRefreshTrigger(prev => prev + 1)
+      // 刷新日期记录状态
+      refreshRecords()
 
       setInputText("")
       setUploadedImages([])
@@ -660,6 +666,8 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
     saveDailyLog(updatedLog.date, updatedLog)
     // 触发图表刷新
     setChartRefreshTrigger(prev => prev + 1)
+    // 刷新日期记录状态
+    refreshRecords()
 
     toast({
       title: (
@@ -691,6 +699,8 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
     saveDailyLog(updatedLog.date, updatedLog)
     // 触发图表刷新
     setChartRefreshTrigger(prev => prev + 1)
+    // 刷新日期记录状态
+    refreshRecords()
 
     toast({
       title: (
@@ -743,6 +753,8 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
       const updatedLog = { ...dailyLog, weight: undefined }
       setDailyLog(updatedLog)
       saveDailyLog(dateKey, updatedLog)
+      // 刷新日期记录状态
+      refreshRecords()
       toast({
         title: <span className="flex items-center"><Info className="mr-2 h-5 w-5" />{t('success.weightCleared')}</span>,
         description: t('success.weightClearedDesc', { date: dateKey })
@@ -765,6 +777,8 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
     saveDailyLog(dateKey, updatedLog)
     // 触发图表刷新
     setChartRefreshTrigger(prev => prev + 1)
+    // 刷新日期记录状态
+    refreshRecords()
     toast({
       title: <span className="flex items-center"><CheckCircle2 className="mr-2 h-5 w-5 text-green-500" />{t('success.weightSaved')}</span>,
       description: t('success.weightSavedDesc', { date: dateKey, weight: weightValue })
@@ -777,6 +791,8 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
     const updatedLog = { ...dailyLog, dailyStatus: status }
     setDailyLog(updatedLog)
     saveDailyLog(dateKey, updatedLog)
+    // 刷新日期记录状态
+    refreshRecords()
     toast({
       title: <span className="flex items-center"><CheckCircle2 className="mr-2 h-5 w-5 text-green-500" />每日状态已保存</span>,
       description: `已保存 ${dateKey} 的状态记录`
@@ -895,6 +911,7 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
                       onSelect={(date) => date && setSelectedDate(date)}
                       initialFocus
                       locale={currentLocale}
+                      hasRecord={hasRecord}
                     />
                   </PopoverContent>
                 </Popover>

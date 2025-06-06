@@ -188,7 +188,7 @@
       "title": "管理图表",
       "description": "{days}健康数据趋势分析",
       "demoDescription": "演示数据 - 请先记录您的健康数据",
-      "optimizedDisplay": "📊 已优化显示：仅显示有数据的时间段 ({count} 天有效数据)",
+      "optimizedDisplay": "已优化显示：仅显示有数据的时间段 ({count} 天有效数据)",
       "loadingCharts": "加载图表数据中...",
       "startRecording": "开始记录您的健康数据",
       "recordingPrompt": "记录体重、饮食和运动数据后，这里将显示您的真实健康趋势图表",

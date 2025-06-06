@@ -7,18 +7,51 @@ import { DayPicker } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  hasRecord?: (date: Date) => boolean
+}
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  hasRecord,
   ...props
 }: CalendarProps) {
+  // 创建一个修饰符来标记有记录的日期
+  const recordedDates = React.useMemo(() => {
+    if (!hasRecord) return []
+
+    // 生成当前月份和前后月份的所有日期来检查
+    const today = new Date()
+    const dates = []
+
+    // 检查前后3个月的日期
+    for (let monthOffset = -3; monthOffset <= 3; monthOffset++) {
+      const checkDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1)
+      const daysInMonth = new Date(checkDate.getFullYear(), checkDate.getMonth() + 1, 0).getDate()
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(checkDate.getFullYear(), checkDate.getMonth(), day)
+        if (hasRecord(date)) {
+          dates.push(date)
+        }
+      }
+    }
+
+    return dates
+  }, [hasRecord])
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
+      modifiers={{
+        recorded: recordedDates,
+      }}
+      modifiersClassNames={{
+        recorded: "has-record",
+      }}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
@@ -39,7 +72,7 @@ function Calendar({
         cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 relative"
         ),
         day_range_end: "day-range-end",
         day_selected:
