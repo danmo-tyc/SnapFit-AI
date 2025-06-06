@@ -110,6 +110,9 @@
       "recordHealthDataDesc": "输入您的饮食或运动记录，智能识别营养和消耗",
       "dietRecord": "饮食记录",
       "exerciseRecord": "运动记录",
+      "dailyStatus": "每日状态",
+      "recordDailyStatus": "记录今日状态",
+      "recordDailyStatusDesc": "记录您的压力、心情、健康状况和睡眠时间",
       "submitRecord": "提交记录",
       "myMeals": "我的膳食",
       "todayFoodCount": "今日共记录 {count} 项食物",
@@ -123,6 +126,36 @@
       "dataExport": "数据导出",
       "neverExported": "建议备份数据",
       "exportReminder": "已{days}天未备份"
+    },
+    "dailyStatus": {
+      "stress": "压力水平",
+      "mood": "心情状态",
+      "health": "健康状况",
+      "sleepTime": "睡眠时间",
+      "bedTime": "睡眠时间",
+      "wakeTime": "起床时间",
+      "sleepQuality": "睡眠质量",
+      "stressNotes": "压力补充说明",
+      "moodNotes": "心情补充说明",
+      "healthNotes": "健康状况补充说明",
+      "sleepNotes": "睡眠补充说明",
+      "levels": {
+        "1": "很差",
+        "2": "较差",
+        "3": "一般",
+        "4": "良好",
+        "5": "很好",
+        "6": "极佳"
+      },
+      "placeholders": {
+        "stress": "描述今日的压力来源或感受...",
+        "mood": "分享今日的心情状态...",
+        "health": "记录身体感受或症状...",
+        "sleep": "记录睡眠质量或相关情况..."
+      },
+      "timeFormat": "HH:MM",
+      "bedTimePlaceholder": "例如: 23:30",
+      "wakeTimePlaceholder": "例如: 07:00"
     },
     "activityLevels": {
       "sedentary": "久坐不动 (办公室工作)",
@@ -178,7 +211,6 @@
     "summary": {
       "title": "今日汇总",
       "description": "您的饮食和运动数据概览",
-      "calorieBalance": "热量平衡",
       "caloriesIn": "卡路里摄入",
       "exerciseBurn": "运动消耗",
       "netCalories": "净卡路里",
@@ -244,7 +276,8 @@
         "morning": "上午",
         "noon": "中午",
         "afternoon": "下午",
-        "evening": "夜宵"
+        "evening": "夜宵",
+        "unknown": "未知时段"
       }
     },
     "exerciseCard": {
@@ -263,9 +296,6 @@
     }
   },
 
-  "summary": {
-    "estimationNote": "这些是基于您个人信息和当日活动水平的估算值。"
-  },
   "food": {
     "title": "食物记录",
     "name": "食物名称",
@@ -310,14 +340,6 @@
   "chat": {
     "title": "智能对话",
     "subtitle": "与AI健康助手对话",
-    "experts": {
-      "general": "通用助手",
-      "nutrition": "营养师",
-      "exercise": "运动专家",
-      "metabolism": "代谢专家",
-      "behavior": "行为专家",
-      "timing": "时机专家"
-    },
     "expertDescriptions": {
       "general": "SnapFit AI 健康助手",
       "nutrition": "注册营养师 (RD)",
@@ -339,36 +361,98 @@
     "configureAI": "请先在设置页面配置聊天模型",
     "historyCleared": "聊天记录已清除",
     "expertHistoryCleared": "{expert}的聊天记录已清除",
+    "startConversation": "请在下方输入您的问题，开始与{expert}的专业对话",
+    "configureAIPrompt": "请先在设置页面配置聊天模型",
     "experts": {
       "general": {
         "name": "通用助手",
         "title": "SnapFit AI 健康助手",
-        "description": "全方位健康管理助手，可以回答各种健康相关问题"
+        "description": "全方位健康管理助手，可以回答各种健康相关问题",
+        "welcomeMessage": {
+          "title": "欢迎使用 SnapFit AI 健康助手",
+          "subtitle": "我是您的全方位健康管理顾问，可以帮助您解答营养、运动、代谢等各方面的健康问题",
+          "features": [
+            "🎯 综合分析您的健康数据",
+            "💡 提供个性化健康建议",
+            "📋 制定可持续的健康计划",
+            "🤝 解答各类健康疑问"
+          ]
+        }
       },
       "nutrition": {
         "name": "营养师",
         "title": "注册营养师 (RD)",
-        "description": "专精宏量营养素配比、膳食结构优化和营养密度分析"
+        "description": "专精宏量营养素配比、膳食结构优化和营养密度分析",
+        "welcomeMessage": {
+          "title": "欢迎咨询专业营养师",
+          "subtitle": "我是 Dr. Sarah Chen，注册营养师，专精运动营养和体重管理，为您提供科学的营养指导",
+          "features": [
+            "🥗 精确分析宏量营养素配比",
+            "📊 评估食物营养密度和质量",
+            "🎯 设计个性化膳食计划",
+            "⏰ 优化进餐时机和营养分配"
+          ]
+        }
       },
       "exercise": {
         "name": "运动专家",
         "title": "SF认证运动生理学家",
-        "description": "专精运动处方设计、能量代谢优化和训练计划制定"
+        "description": "专精运动处方设计、能量代谢优化和训练计划制定",
+        "welcomeMessage": {
+          "title": "欢迎来到专业健身指导",
+          "subtitle": "我是 Coach Mike Rodriguez，认证运动生理学家，专门为您设计科学的运动方案",
+          "features": [
+            "💪 设计个性化运动处方",
+            "🎯 优化有氧无氧运动配比",
+            "📊 计算最佳运动强度区间",
+            "⚡ 制定运动营养配合策略"
+          ]
+        }
       },
       "metabolism": {
         "name": "代谢专家",
         "title": "代谢内分泌学博士",
-        "description": "专精基础代谢、食物热效应和代谢综合征的精准分析"
+        "description": "专精基础代谢、食物热效应和代谢综合征的精准分析",
+        "welcomeMessage": {
+          "title": "欢迎咨询代谢优化专家",
+          "subtitle": "我是 Dr. Emily Watson，内分泌代谢专家，专注于人体能量代谢的精密调节和优化",
+          "features": [
+            "🔥 精确分析BMR、TDEE匹配度",
+            "⚡ 优化食物热效应(TEF)",
+            "🧬 评估代谢适应性和灵活性",
+            "📊 分析胰岛素敏感性调节"
+          ]
+        }
       },
       "behavior": {
         "name": "行为专家",
         "title": "行为心理学专家",
-        "description": "专精健康行为改变、习惯养成和动机维持的科学方法"
+        "description": "专精健康行为改变、习惯养成和动机维持的科学方法",
+        "welcomeMessage": {
+          "title": "欢迎来到行为改变实验室",
+          "subtitle": "我是 Dr. Alex Thompson，行为心理学专家，专门帮助您建立可持续的健康习惯",
+          "features": [
+            "🧠 识别行为模式和触发点",
+            "🔄 设计个性化行为改变策略",
+            "🏠 优化环境和提示系统",
+            "📈 建立渐进式习惯养成计划"
+          ]
+        }
       },
       "timing": {
         "name": "时机专家",
         "title": "时间营养学专家",
-        "description": "专精生物节律、营养时机和睡眠-代谢协调优化"
+        "description": "专精生物节律、营养时机和睡眠-代谢协调优化",
+        "welcomeMessage": {
+          "title": "欢迎进入时间营养学世界",
+          "subtitle": "我是 Dr. Maria Gonzalez，时间营养学专家，帮您找到最佳的生物节律和营养时机",
+          "features": [
+            "⏰ 进餐时机与昼夜节律同步",
+            "🏃 运动时机与代谢窗口匹配",
+            "🌙 睡眠-代谢-营养协调优化",
+            "📅 个性化生物节律时间表"
+          ]
+        }
       }
     },
     "systemPrompts": {
@@ -385,7 +469,24 @@
         "营养配比优化": "营养配比优化",
         "运动处方优化": "运动处方优化",
         "行为习惯优化": "行为习惯优化",
-        "时机优化策略": "时机优化策略"
+        "时机优化策略": "时机优化策略",
+        "整体健康优化": "整体健康优化",
+        "overallHealthOptimization": "整体健康优化",
+        "睡眠优化": "睡眠优化",
+        "sleepOptimization": "睡眠优化",
+        "压力管理": "压力管理",
+        "stressManagement": "压力管理",
+        "水分补充": "水分补充",
+        "hydrationOptimization": "水分补充",
+        "心理健康": "心理健康",
+        "mentalHealth": "心理健康",
+        "wellnessOptimization": "整体健康优化",
+        "wellness": "整体健康优化",
+        "nutrition": "营养配比优化",
+        "exercise": "运动处方优化",
+        "metabolism": "代谢调节优化",
+        "behavior": "行为习惯优化",
+        "timing": "时机优化策略"
       },
       "actionable": "可执行",
       "analysisUnavailable": "分析暂时不可用"
@@ -393,6 +494,36 @@
   },
   "settings": {
     "title": "我的档案与设置",
+    "common": {
+      "save": "保存",
+      "cancel": "取消",
+      "delete": "删除",
+      "edit": "编辑",
+      "add": "添加",
+      "confirm": "确认",
+      "clear": "清除",
+      "loading": "加载中...",
+      "error": "错误",
+      "success": "成功",
+      "warning": "警告",
+      "info": "信息",
+      "close": "关闭",
+      "back": "返回",
+      "next": "下一步",
+      "previous": "上一步",
+      "search": "搜索",
+      "export": "导出",
+      "import": "导入",
+      "refresh": "刷新",
+      "upload": "上传",
+      "download": "下载",
+      "send": "发送",
+      "sending": "发送中...",
+      "optional": "可选",
+      "required": "必填",
+      "yes": "是",
+      "no": "否"
+    },
     "tabs": {
       "profile": "个人信息",
       "goals": "健康目标",
@@ -418,14 +549,8 @@
         "very_active": "非常活跃"
       },
       "activityLevelDescription": "设定您通常的活动水平。此设置将作为新日期的默认活动水平，或当您未在主页为特定日期指定活动水平时的备用值。",
-      "bmrFormula": "BMR 计算公式",
-      "bmrFormulaDescription": "选择用于计算基础代谢率 (BMR) 的公式。",
-      "bmrCalculationBasis": "BMR 计算依据",
+
       "bmrCalculationBasisDescription": "选择计算BMR时是使用总体重还是去脂体重。选择后者通常更准确，但需要您提供体脂率。",
-      "totalWeight": "基于总体重",
-      "leanBodyMass": "基于去脂体重 (需填写体脂率)",
-      "bodyFatPercentage": "体脂率 (%)",
-      "bodyFatDescription": "请输入您的体脂百分比。例如，输入15代表15%。",
       "saveProfile": "保存个人信息",
       "saveSuccess": "保存成功",
       "saveSuccessDesc": "您的个人资料已更新",
@@ -443,23 +568,7 @@
       "bodyFatPlaceholder": "例如: 15",
       "bodyFatDescription": "请输入您的体脂百分比。例如，输入15代表15%。"
     },
-    "goals": {
-      "title": "健康目标",
-      "description": "设置您的健康目标，AI 助手将根据您的目标提供个性化建议",
-      "goalType": "目标类型",
-      "goalTypes": {
-        "lose_weight": "减重",
-        "maintain": "保持体重",
-        "gain_weight": "增重",
-        "build_muscle": "增肌",
-        "improve_health": "改善健康"
-      },
-      "targetWeight": "目标体重 (kg)",
-      "targetCalories": "目标每日卡路里 (kcal)",
-      "notes": "其他目标或注意事项",
-      "notesPlaceholder": "例如：增加蛋白质摄入，减少糖分等",
-      "saveGoals": "保存健康目标"
-    },
+
     "buttons": {
       "save": "保存",
       "test": "测试",
@@ -524,7 +633,17 @@
       "targetCalories": "目标每日卡路里 (kcal)",
       "optional": "可选",
       "notes": "其他目标或注意事项",
-      "notesPlaceholder": "例如：增加蛋白质摄入，减少糖分等",
+      "notesSubtitle": "补充说明您的个人目标和相关情况",
+      "notesDescription": "个人目标：如改善睡眠、增强体力、提升运动表现等\n相关情况：如饮食偏好、生活习惯、身体状况、用药情况等（可选填写，有助于AI提供更精准的建议）",
+      "notesPlaceholder": "分享您的个人目标和偏好，让AI更好地为您服务...",
+      "professionalMode": "专业模式",
+      "professionalModeDescription": "启用专业模式以填写更详细的健康信息，帮助AI提供更精准的个性化建议",
+      "medicalHistory": "现有疾病、过敏、药物/补充剂、家族病史",
+      "medicalHistoryPlaceholder": "请详细描述您的现有疾病、过敏史、正在服用的药物或补充剂（包括剂量和原因）、以及家族病史等信息...",
+      "lifestyle": "食物偏好/禁忌、睡眠质量、压力水平、烟酒习惯",
+      "lifestylePlaceholder": "请描述您的饮食偏好和禁忌、睡眠质量、日常压力水平、烟酒习惯等生活方式信息...",
+      "healthAwareness": "健康认知与目标期望",
+      "healthAwarenessPlaceholder": "请分享您对自身健康状况的认知、对卡路里目标的理解和期望、改变的意愿以及可能面临的挑战...",
       "saveGoals": "保存健康目标"
     },
     "data": {
@@ -548,6 +667,16 @@
       "exportErrorDescription": "无法导出您的健康数据",
       "importErrorTitle": "导入失败",
       "importErrorDescription": "无法导入您的健康数据，请确保文件格式正确",
+      "importSuccessTitle": "导入成功",
+      "importSuccessDescription": "您的健康数据已成功导入",
+      "importSuccessWithMemoryTitle": "导入成功",
+      "importSuccessWithMemoryDescription": "您的健康数据和AI记忆已成功导入",
+      "partialImportSuccessTitle": "部分导入成功",
+      "partialImportSuccessDescription": "健康数据导入成功，但AI记忆导入失败",
+      "clearSuccessTitle": "清除成功",
+      "clearSuccessDescription": "所有健康日志数据已清除",
+      "clearErrorTitle": "清除失败",
+      "clearErrorDescription": "无法清除您的健康数据",
       "selectFile": "选择文件"
     },
     "about": {
@@ -575,7 +704,6 @@
       "apiKey": "API Key",
       "modelName": "模型名称",
       "getModels": "获取模型",
-      "testConnection": "测试连接",
       "saveConfig": "保存 AI 配置",
       "configIncomplete": "配置不完整",
       "fillAllFields": "请填写所有模型的名称、Base URL 和 API Key",
@@ -603,7 +731,34 @@
       "modelNamePlaceholder": "例如: gpt-4o",
       "fetchModels": "获取模型",
       "testConnection": "测试连接",
-      "modelsFound": "已获取 {count} 个可用模型"
+      "memoryManagement": {
+        "title": "AI助手记忆管理",
+        "description": "查看和管理每个AI助手的记忆内容。AI助手会记住重要的用户信息以提供更个性化的建议。",
+        "noMemoryData": "暂无AI记忆数据",
+        "expertNames": {
+          "general": "通用助手",
+          "nutrition": "营养师",
+          "exercise": "运动专家",
+          "metabolism": "代谢专家",
+          "behavior": "行为专家",
+          "timing": "时机专家"
+        },
+        "memoryPlaceholder": "AI助手的记忆内容...",
+        "saving": "保存中",
+        "unsaved": "未保存",
+        "clearAllMemories": "清空所有AI记忆",
+        "confirmClearTitle": "确认清空所有AI记忆",
+        "confirmClearDescription": "此操作将清空所有AI助手的记忆内容，无法恢复。AI助手将失去对您的个性化了解。",
+        "cancel": "取消",
+        "confirmClear": "确认清空",
+        "allMemoriesCleared": "所有记忆已清空",
+        "allMemoriesClearedDescription": "所有AI助手的记忆已清空",
+        "clearFailed": "清空失败",
+        "memorySaved": "记忆已保存",
+        "memorySavedDescription": "AI助手记忆已自动保存",
+        "saveFailed": "保存失败",
+        "saveFailedDescription": "记忆保存失败，请重试"
+      }
     }
   },
   "summary": {

@@ -16,12 +16,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
-import type { FoodEntry, ExerciseEntry, DailyLog, AIConfig } from "@/lib/types"
+import type { FoodEntry, ExerciseEntry, DailyLog, AIConfig, DailyStatus } from "@/lib/types"
 import { FoodEntryCard } from "@/components/food-entry-card"
 import { ExerciseEntryCard } from "@/components/exercise-entry-card"
 import { DailySummary } from "@/components/daily-summary"
 import { ManagementCharts } from "@/components/management-charts"
 import { SmartSuggestions } from "@/components/smart-suggestions"
+import { DailyStatusCard } from "@/components/DailyStatusCard"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useIndexedDB } from "@/hooks/use-indexed-db"
 import { useExportReminder } from "@/hooks/use-export-reminder"
@@ -30,6 +31,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { calculateMetabolicRates } from "@/lib/health-utils"
 import { generateTEFAnalysis } from "@/lib/tef-utils"
+import { tefCacheManager } from "@/lib/tef-cache"
 import type { SmartSuggestionsResponse } from "@/lib/types"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useTranslation } from "@/hooks/use-i18n"
@@ -247,40 +249,40 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // 用于跟踪食物条目的实际内容变化
-  const previousFoodEntriesRef = useRef<string>('');
-  const isInitialLoadRef = useRef(true);
+  const previousFoodEntriesHashRef = useRef<string>('');
 
   // 当食物条目变化时，使用防抖机制重新分析TEF
   useEffect(() => {
-    // 生成当前食物条目的唯一标识
-    const currentFoodEntriesSignature = JSON.stringify(
-      dailyLog.foodEntries.map(entry => ({
-        id: entry.log_id,
-        name: entry.food_name,
-        grams: entry.consumed_grams,
-        timestamp: entry.timestamp
-      }))
-    );
+    const currentHash = tefCacheManager.generateFoodEntriesHash(dailyLog.foodEntries);
 
-    // 如果是初始加载，只设置引用，不触发分析
-    if (isInitialLoadRef.current) {
-      previousFoodEntriesRef.current = currentFoodEntriesSignature;
-      isInitialLoadRef.current = false;
+    // 检查是否已有缓存的分析结果
+    const cachedAnalysis = tefCacheManager.getCachedAnalysis(dailyLog.foodEntries);
+    if (cachedAnalysis && dailyLog.foodEntries.length > 0) {
+      // 使用缓存的分析结果
+      if (!dailyLog.tefAnalysis || JSON.stringify(dailyLog.tefAnalysis) !== JSON.stringify(cachedAnalysis)) {
+        console.log('Applying cached TEF analysis');
+        setDailyLog(currentLog => {
+          const updatedLog = {
+            ...currentLog,
+            tefAnalysis: cachedAnalysis
+          };
+          saveDailyLog(updatedLog.date, updatedLog);
+          return updatedLog;
+        });
+      }
+      previousFoodEntriesHashRef.current = currentHash;
       return;
     }
 
-    // 检查食物条目是否真的发生了变化
-    const hasRealChange = currentFoodEntriesSignature !== previousFoodEntriesRef.current;
-
-    if (!hasRealChange) {
-      // 如果没有实际变化，不重新开始计时
+    // 检查是否需要重新分析
+    if (!tefCacheManager.shouldAnalyzeTEF(dailyLog.foodEntries, previousFoodEntriesHashRef.current)) {
       return;
     }
 
-    // 更新引用
-    previousFoodEntriesRef.current = currentFoodEntriesSignature;
+    // 更新哈希引用
+    previousFoodEntriesHashRef.current = currentHash;
 
-    console.log('Food entries changed, starting TEF analysis countdown...');
+    console.log('Food entries changed significantly, starting TEF analysis countdown...');
 
     // 清除之前的定时器
     if (tefAnalysisTimeoutRef.current) {
@@ -314,26 +316,31 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
         setTEFAnalysisCountdown(0);
         performTEFAnalysis(dailyLog.foodEntries).then(tefResult => {
           if (tefResult) {
+            // 使用本地工具计算基础TEF，并结合AI分析的乘数和因素
+            const localTEFAnalysis = generateTEFAnalysis(
+              dailyLog.foodEntries,
+              tefResult.enhancementMultiplier
+            );
+
+            const finalAnalysis = {
+              ...localTEFAnalysis,
+              // 使用AI分析的因素，如果AI没有提供则使用本地识别的
+              enhancementFactors: tefResult.enhancementFactors && tefResult.enhancementFactors.length > 0
+                ? tefResult.enhancementFactors
+                : localTEFAnalysis.enhancementFactors,
+              analysisTimestamp: tefResult.analysisTimestamp || localTEFAnalysis.analysisTimestamp,
+            };
+
+            // 缓存分析结果
+            tefCacheManager.setCachedAnalysis(dailyLog.foodEntries, finalAnalysis);
+
+            console.log('AI enhancementFactors:', tefResult.enhancementFactors);
+            console.log('Local enhancementFactors:', localTEFAnalysis.enhancementFactors);
+
             setDailyLog(currentLog => {
-              // 使用本地工具计算基础TEF，并结合AI分析的乘数和因素
-              const localTEFAnalysis = generateTEFAnalysis(
-                dailyLog.foodEntries,
-                tefResult.enhancementMultiplier
-              );
-
-              console.log('AI enhancementFactors:', tefResult.enhancementFactors);
-              console.log('Local enhancementFactors:', localTEFAnalysis.enhancementFactors);
-
               const updatedLog = {
                 ...currentLog,
-                tefAnalysis: {
-                  ...localTEFAnalysis,
-                  // 使用AI分析的因素，如果AI没有提供则使用本地识别的
-                  enhancementFactors: tefResult.enhancementFactors && tefResult.enhancementFactors.length > 0
-                    ? tefResult.enhancementFactors
-                    : localTEFAnalysis.enhancementFactors,
-                  analysisTimestamp: tefResult.analysisTimestamp || localTEFAnalysis.analysisTimestamp,
-                }
+                tefAnalysis: finalAnalysis
               };
               saveDailyLog(updatedLog.date, updatedLog);
               return updatedLog;
@@ -764,6 +771,18 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
     })
   }
 
+  // 处理每日状态保存
+  const handleSaveDailyStatus = (status: DailyStatus) => {
+    const dateKey = format(selectedDate, "yyyy-MM-dd")
+    const updatedLog = { ...dailyLog, dailyStatus: status }
+    setDailyLog(updatedLog)
+    saveDailyLog(dateKey, updatedLog)
+    toast({
+      title: <span className="flex items-center"><CheckCircle2 className="mr-2 h-5 w-5 text-green-500" />每日状态已保存</span>,
+      description: `已保存 ${dateKey} 的状态记录`
+    })
+  }
+
   return (
     <div className="min-h-screen relative bg-white dark:bg-slate-900">
       {/* 弥散绿色背景效果 - 带动画 */}
@@ -1006,40 +1025,65 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
         {/* 输入区域 */}
         <div className="health-card mb-16 slide-up">
           <div className="p-8">
-            <div className="flex items-center space-x-4 mb-8">
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary text-white">
-                <ClipboardPenLine className="h-6 w-6" />
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary text-white">
+                  <ClipboardPenLine className="h-6 w-6" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-semibold">{t('ui.recordHealthData')}</h2>
+                  <p className="text-muted-foreground text-lg">{t('ui.recordHealthDataDesc')}</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-2xl font-semibold">{t('ui.recordHealthData')}</h2>
-                <p className="text-muted-foreground text-lg">{t('ui.recordHealthDataDesc')}</p>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">今日记录</span>
+                <span className="text-sm font-mono bg-muted px-2 py-1 rounded">
+                  {(() => {
+                    let count = 0
+                    if (dailyLog.foodEntries.length > 0) count++
+                    if (dailyLog.exerciseEntries.length > 0) count++
+                    if (dailyLog.dailyStatus) count++
+                    return `${count}/3`
+                  })()}
+                </span>
               </div>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-              <TabsList className="grid w-full grid-cols-2 h-14">
+              <TabsList className="grid w-full grid-cols-3 h-14">
                 <TabsTrigger value="food" className="text-base py-4 px-8">
                   <Utensils className="mr-2 h-5 w-5" />{t('ui.dietRecord')}
                 </TabsTrigger>
                 <TabsTrigger value="exercise" className="text-base py-4 px-8">
                   <Dumbbell className="mr-2 h-5 w-5" />{t('ui.exerciseRecord')}
                 </TabsTrigger>
+                <TabsTrigger value="status" className="text-base py-4 px-8">
+                  <Activity className="mr-2 h-5 w-5" />{t('ui.dailyStatus')}
+                </TabsTrigger>
               </TabsList>
             </Tabs>
 
             <div className="space-y-6">
-              <Textarea
-                placeholder={
-                  activeTab === "food"
-                    ? t('placeholders.foodExample')
-                    : t('placeholders.exerciseExample')
-                }
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                className="min-h-[140px] text-base p-6 rounded-xl"
-              />
+              {activeTab === "status" ? (
+                <DailyStatusCard
+                  date={format(selectedDate, "yyyy-MM-dd")}
+                  initialStatus={dailyLog.dailyStatus}
+                  onSave={handleSaveDailyStatus}
+                />
+              ) : (
+                <Textarea
+                  placeholder={
+                    activeTab === "food"
+                      ? t('placeholders.foodExample')
+                      : t('placeholders.exerciseExample')
+                  }
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  className="min-h-[140px] text-base p-6 rounded-xl"
+                />
+              )}
 
-              {uploadedImages.length > 0 && (
+              {activeTab !== "status" && uploadedImages.length > 0 && (
                 <div className="p-6 rounded-xl bg-muted/30 border">
                   <p className="text-muted-foreground mb-4 flex items-center font-medium">
                     <ImageIcon className="mr-2 h-5 w-5" /> {t('images.uploaded', { count: uploadedImages.length })}
@@ -1066,6 +1110,7 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
                 </div>
               )}
 
+              {activeTab !== "status" && (
               <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pt-6">
                 <div className="flex items-center space-x-4">
                   <input
@@ -1122,6 +1167,7 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
                   )}
                 </Button>
               </div>
+              )}
             </div>
           </div>
         </div>

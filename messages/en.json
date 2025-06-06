@@ -6,6 +6,7 @@
     "edit": "Edit",
     "add": "Add",
     "confirm": "Confirm",
+    "clear": "Clear",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
@@ -16,7 +17,6 @@
     "next": "Next",
     "previous": "Previous",
     "search": "Search",
-    "clear": "Clear",
     "export": "Export",
     "import": "Import",
     "refresh": "Refresh",
@@ -47,6 +47,7 @@
     "today": "Today",
     "addFood": "Add Food",
     "addExercise": "Add Exercise",
+
     "dailySummary": "Daily Summary",
     "weeklyTrend": "Weekly Trend",
     "monthlyOverview": "Monthly Overview",
@@ -110,6 +111,9 @@
       "recordHealthDataDesc": "Enter your diet or exercise records, intelligently identify nutrition and consumption",
       "dietRecord": "Diet Record",
       "exerciseRecord": "Exercise Record",
+      "dailyStatus": "Daily Status",
+      "recordDailyStatus": "Record Today's Status",
+      "recordDailyStatusDesc": "Record your stress, mood, health condition and sleep times",
       "submitRecord": "Submit Record",
       "myMeals": "My Meals",
       "todayFoodCount": "Recorded {count} food items today",
@@ -123,6 +127,36 @@
       "dataExport": "Data Export",
       "neverExported": "Backup recommended",
       "exportReminder": "{days} days since backup"
+    },
+    "dailyStatus": {
+      "stress": "Stress Level",
+      "mood": "Mood State",
+      "health": "Health Condition",
+      "sleepTime": "Sleep Time",
+      "bedTime": "Bedtime",
+      "wakeTime": "Wake Time",
+      "sleepQuality": "Sleep Quality",
+      "stressNotes": "Stress Notes",
+      "moodNotes": "Mood Notes",
+      "healthNotes": "Health Notes",
+      "sleepNotes": "Sleep Notes",
+      "levels": {
+        "1": "Very Poor",
+        "2": "Poor",
+        "3": "Fair",
+        "4": "Good",
+        "5": "Very Good",
+        "6": "Excellent"
+      },
+      "placeholders": {
+        "stress": "Describe today's stress sources or feelings...",
+        "mood": "Share today's mood state...",
+        "health": "Record physical feelings or symptoms...",
+        "sleep": "Record sleep quality or related conditions..."
+      },
+      "timeFormat": "HH:MM",
+      "bedTimePlaceholder": "e.g., 23:30",
+      "wakeTimePlaceholder": "e.g., 07:00"
     },
     "activityLevels": {
       "sedentary": "Sedentary (Office work)",
@@ -178,7 +212,6 @@
     "summary": {
       "title": "Daily Summary",
       "description": "Overview of your diet and exercise data",
-      "calorieBalance": "Calorie Balance",
       "caloriesIn": "Calories In",
       "exerciseBurn": "Exercise Burn",
       "netCalories": "Net Calories",
@@ -244,7 +277,8 @@
         "morning": "Morning",
         "noon": "Noon",
         "afternoon": "Afternoon",
-        "evening": "Evening"
+        "evening": "Evening",
+        "unknown": "Unknown Period"
       }
     },
     "exerciseCard": {
@@ -340,14 +374,6 @@
   "chat": {
     "title": "AI Chat",
     "subtitle": "Chat with AI Health Assistant",
-    "experts": {
-      "general": "General Assistant",
-      "nutrition": "Nutritionist",
-      "exercise": "Exercise Expert",
-      "metabolism": "Metabolism Expert",
-      "behavior": "Behavior Expert",
-      "timing": "Timing Expert"
-    },
     "expertDescriptions": {
       "general": "SnapFit AI Health Assistant",
       "nutrition": "Registered Dietitian (RD)",
@@ -369,36 +395,98 @@
     "configureAI": "Please configure the chat model in settings first",
     "historyCleared": "Chat history cleared",
     "expertHistoryCleared": "{expert}'s chat history cleared",
+    "startConversation": "Enter your question to start chatting with {expert}",
+    "configureAIPrompt": "Please configure chat model in settings first",
     "experts": {
       "general": {
         "name": "General Assistant",
         "title": "SnapFit AI Health Assistant",
-        "description": "Comprehensive health management assistant that can answer various health-related questions"
+        "description": "Comprehensive health management assistant that can answer various health-related questions",
+        "welcomeMessage": {
+          "title": "Welcome to SnapFit AI",
+          "subtitle": "Your comprehensive health consultant for nutrition, exercise, metabolism and wellness",
+          "features": [
+            "🎯 Analyze your health data",
+            "💡 Personalized recommendations",
+            "📋 Sustainable health plans",
+            "🤝 Expert health guidance"
+          ]
+        }
       },
       "nutrition": {
         "name": "Nutritionist",
         "title": "Registered Dietitian (RD)",
-        "description": "Specialized in macronutrient ratios, dietary structure optimization, and nutrient density analysis"
+        "description": "Specialized in macronutrient ratios, dietary structure optimization, and nutrient density analysis",
+        "welcomeMessage": {
+          "title": "Professional Nutrition Consultation",
+          "subtitle": "Dr. Sarah Chen, RD specializing in sports nutrition and weight management",
+          "features": [
+            "🥗 Macronutrient ratio analysis",
+            "📊 Food nutrient assessment",
+            "🎯 Personalized meal plans",
+            "⏰ Optimal nutrition timing"
+          ]
+        }
       },
       "exercise": {
         "name": "Exercise Expert",
         "title": "SF Certified Exercise Physiologist",
-        "description": "Specialized in exercise prescription design, energy metabolism optimization, and training plan development"
+        "description": "Specialized in exercise prescription design, energy metabolism optimization, and training plan development",
+        "welcomeMessage": {
+          "title": "Professional Fitness Guidance",
+          "subtitle": "Coach Mike Rodriguez, certified exercise physiologist for scientific training",
+          "features": [
+            "💪 Personalized exercise plans",
+            "🎯 Aerobic/anaerobic optimization",
+            "📊 Optimal intensity zones",
+            "⚡ Exercise-nutrition strategies"
+          ]
+        }
       },
       "metabolism": {
         "name": "Metabolism Expert",
         "title": "Metabolic Endocrinology PhD",
-        "description": "Specialized in basal metabolism, thermic effect of food, and precise analysis of metabolic syndrome"
+        "description": "Specialized in basal metabolism, thermic effect of food, and precise analysis of metabolic syndrome",
+        "welcomeMessage": {
+          "title": "Metabolism Optimization",
+          "subtitle": "Dr. Emily Watson, metabolism specialist for energy regulation optimization",
+          "features": [
+            "🔥 BMR/TDEE analysis",
+            "⚡ TEF optimization",
+            "🧬 Metabolic flexibility",
+            "📊 Insulin sensitivity"
+          ]
+        }
       },
       "behavior": {
         "name": "Behavior Expert",
         "title": "Behavioral Psychology Expert",
-        "description": "Specialized in health behavior change, habit formation, and scientific methods for motivation maintenance"
+        "description": "Specialized in health behavior change, habit formation, and scientific methods for motivation maintenance",
+        "welcomeMessage": {
+          "title": "Behavior Change Lab",
+          "subtitle": "Dr. Alex Thompson, behavioral expert for sustainable healthy habits",
+          "features": [
+            "🧠 Behavior pattern analysis",
+            "🔄 Change strategy design",
+            "🏠 Environment optimization",
+            "📈 Habit formation plans"
+          ]
+        }
       },
       "timing": {
         "name": "Timing Expert",
         "title": "Chrono-nutrition Expert",
-        "description": "Specialized in biological rhythms, nutrient timing, and sleep-metabolism coordination optimization"
+        "description": "Specialized in biological rhythms, nutrient timing, and sleep-metabolism coordination optimization",
+        "welcomeMessage": {
+          "title": "Chrono-nutrition World",
+          "subtitle": "Dr. Maria Gonzalez, timing expert for optimal biological rhythms",
+          "features": [
+            "⏰ Circadian rhythm sync",
+            "🏃 Metabolic window timing",
+            "🌙 Sleep-metabolism coordination",
+            "📅 Personalized schedules"
+          ]
+        }
       }
     },
     "systemPrompts": {
@@ -423,6 +511,36 @@
   },
   "settings": {
     "title": "Profile & Settings",
+    "common": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "add": "Add",
+      "confirm": "Confirm",
+      "clear": "Clear",
+      "loading": "Loading...",
+      "error": "Error",
+      "success": "Success",
+      "warning": "Warning",
+      "info": "Info",
+      "close": "Close",
+      "back": "Back",
+      "next": "Next",
+      "previous": "Previous",
+      "search": "Search",
+      "export": "Export",
+      "import": "Import",
+      "refresh": "Refresh",
+      "upload": "Upload",
+      "download": "Download",
+      "send": "Send",
+      "sending": "Sending...",
+      "optional": "Optional",
+      "required": "Required",
+      "yes": "Yes",
+      "no": "No"
+    },
     "tabs": {
       "profile": "Personal Info",
       "goals": "Health Goals",
@@ -448,14 +566,7 @@
         "very_active": "Extremely Active"
       },
       "activityLevelDescription": "Set your usual activity level. This setting will be used as the default activity level for new dates, or as a fallback when you haven't specified an activity level for a specific date on the homepage.",
-      "bmrFormula": "BMR Calculation Formula",
-      "bmrFormulaDescription": "Choose the formula used to calculate Basal Metabolic Rate (BMR).",
-      "bmrCalculationBasis": "BMR Calculation Basis",
       "bmrCalculationBasisDescription": "Choose whether to use total body weight or lean body mass when calculating BMR. The latter is usually more accurate, but requires you to provide body fat percentage.",
-      "totalWeight": "Based on Total Weight",
-      "leanBodyMass": "Based on Lean Body Mass (requires body fat %)",
-      "bodyFatPercentage": "Body Fat Percentage (%)",
-      "bodyFatDescription": "Please enter your body fat percentage. For example, enter 15 for 15%.",
       "saveProfile": "Save Personal Information",
       "saveSuccess": "Save Success",
       "saveSuccessDesc": "Your profile has been updated",
@@ -473,23 +584,7 @@
       "bodyFatPlaceholder": "e.g., 15",
       "bodyFatDescription": "Please enter your body fat percentage. For example, enter 15 for 15%."
     },
-    "goals": {
-      "title": "Health Goals",
-      "description": "Set your health goals, the AI assistant will provide personalized recommendations based on your goals",
-      "goalType": "Goal Type",
-      "goalTypes": {
-        "lose_weight": "Lose Weight",
-        "maintain": "Maintain Weight",
-        "gain_weight": "Gain Weight",
-        "build_muscle": "Build Muscle",
-        "improve_health": "Improve Health"
-      },
-      "targetWeight": "Target Weight (kg)",
-      "targetCalories": "Target Daily Calories (kcal)",
-      "notes": "Other Goals or Notes",
-      "notesPlaceholder": "e.g., Increase protein intake, reduce sugar, etc.",
-      "saveGoals": "Save Health Goals"
-    },
+
     "buttons": {
       "save": "Save",
       "test": "Test",
@@ -554,32 +649,20 @@
       "targetCalories": "Target Daily Calories (kcal)",
       "optional": "Optional",
       "notes": "Other Goals or Notes",
-      "notesPlaceholder": "e.g., Increase protein intake, reduce sugar, etc.",
+      "notesSubtitle": "Additional information about your personal goals and relevant conditions",
+      "notesDescription": "Personal goals: such as improve sleep, boost energy, enhance athletic performance, etc.\nRelevant conditions: such as dietary preferences, lifestyle habits, health conditions, medications, etc. (optional, helps AI provide more precise recommendations)",
+      "notesPlaceholder": "Share your personal goals and preferences to help AI serve you better...",
+      "professionalMode": "Professional Mode",
+      "professionalModeDescription": "Enable professional mode to provide more detailed health information for more precise AI recommendations",
+      "medicalHistory": "Medical History, Allergies, Medications/Supplements, Family History",
+      "medicalHistoryPlaceholder": "Please describe your existing medical conditions, allergies, medications or supplements you're taking (including dosage and reasons), and family medical history...",
+      "lifestyle": "Food Preferences/Restrictions, Sleep Quality, Stress Level, Smoking/Drinking Habits",
+      "lifestylePlaceholder": "Please describe your dietary preferences and restrictions, sleep quality, daily stress levels, smoking/drinking habits, and other lifestyle information...",
+      "healthAwareness": "Health Awareness & Goal Expectations",
+      "healthAwarenessPlaceholder": "Please share your understanding of your health status, expectations for calorie goals, willingness to change, and potential challenges you may face...",
       "saveGoals": "Save Health Goals"
     },
-    "data": {
-      "title": "Data Management",
-      "description": "Export or import your health data, or clear all data",
-      "exportData": "Export Data",
-      "exportDescription": "Export all your health data as a JSON file for backup or migration",
-      "exportAllData": "Export All Data",
-      "importData": "Import Data",
-      "importDescription": "Import health data from a previously exported JSON file",
-      "clearData": "Clear Data",
-      "clearDescription": "Clear all health log data, this operation cannot be undone",
-      "clearAllData": "Clear All Data",
-      "confirmClearTitle": "Confirm Clear Data",
-      "confirmClearDescription": "This operation will permanently delete all health log data and cannot be recovered. Are you sure you want to continue?",
-      "cancel": "Cancel",
-      "confirmClear": "Confirm Clear",
-      "exportSuccessTitle": "Export Successful",
-      "exportSuccessDescription": "Your health data has been exported as a JSON file",
-      "exportErrorTitle": "Export Failed",
-      "exportErrorDescription": "Unable to export your health data",
-      "importErrorTitle": "Import Failed",
-      "importErrorDescription": "Unable to import your health data, please ensure the file format is correct",
-      "selectFile": "Select File"
-    },
+
     "about": {
       "title": "About & Help",
       "privacyTitle": "Privacy Statement",
@@ -605,7 +688,6 @@
       "apiKey": "API Key",
       "modelName": "Model Name",
       "getModels": "Get Models",
-      "testConnection": "Test Connection",
       "saveConfig": "Save AI Configuration",
       "configIncomplete": "Configuration Incomplete",
       "fillAllFields": "Please fill in the name, Base URL and API Key for all models",
@@ -633,7 +715,34 @@
       "modelNamePlaceholder": "e.g., gpt-4o",
       "fetchModels": "Fetch Models",
       "testConnection": "Test Connection",
-      "modelsFound": "Found {count} available models"
+      "memoryManagement": {
+        "title": "AI Assistant Memory Management",
+        "description": "View and manage the memory content of each AI assistant. AI assistants remember important user information to provide more personalized recommendations.",
+        "noMemoryData": "No AI memory data available",
+        "expertNames": {
+          "general": "General Assistant",
+          "nutrition": "Nutritionist",
+          "exercise": "Exercise Expert",
+          "metabolism": "Metabolism Expert",
+          "behavior": "Behavior Expert",
+          "timing": "Timing Expert"
+        },
+        "memoryPlaceholder": "AI assistant memory content...",
+        "saving": "Saving",
+        "unsaved": "Unsaved",
+        "clearAllMemories": "Clear All AI Memories",
+        "confirmClearTitle": "Confirm Clear All AI Memories",
+        "confirmClearDescription": "This operation will clear all AI assistant memory content and cannot be recovered. AI assistants will lose their personalized understanding of you.",
+        "cancel": "Cancel",
+        "confirmClear": "Confirm Clear",
+        "allMemoriesCleared": "All Memories Cleared",
+        "allMemoriesClearedDescription": "All AI assistant memories have been cleared",
+        "clearFailed": "Clear Failed",
+        "memorySaved": "Memory Saved",
+        "memorySavedDescription": "AI assistant memory has been automatically saved",
+        "saveFailed": "Save Failed",
+        "saveFailedDescription": "Memory save failed, please try again"
+      }
     },
     "data": {
       "title": "Data Management",
@@ -656,20 +765,17 @@
       "exportErrorDescription": "Unable to export your health data",
       "importErrorTitle": "Import Failed",
       "importErrorDescription": "Unable to import your health data, please ensure the file format is correct",
+      "importSuccessTitle": "Import Successful",
+      "importSuccessDescription": "Your health data has been successfully imported",
+      "importSuccessWithMemoryTitle": "Import Successful",
+      "importSuccessWithMemoryDescription": "Your health data and AI memories have been successfully imported",
+      "partialImportSuccessTitle": "Partial Import Successful",
+      "partialImportSuccessDescription": "Health data imported successfully, but AI memory import failed",
+      "clearSuccessTitle": "Clear Successful",
+      "clearSuccessDescription": "All health log data has been cleared",
+      "clearErrorTitle": "Clear Failed",
+      "clearErrorDescription": "Unable to clear your health data",
       "selectFile": "Select File"
-    },
-    "about": {
-      "title": "About & Help",
-      "privacyTitle": "Privacy Statement",
-      "privacyDescription": "All data in this application is stored locally in your browser and will not be uploaded to any server. Communication with AI models is only used to process your input and generate recommendations, and will not store your personal data.",
-      "usageTitle": "Usage Instructions",
-      "usage1": "Record your diet and exercise on the homepage",
-      "usage2": "Use text input or upload images to add records",
-      "usage3": "Chat with AI assistant on the intelligent conversation page to get health advice",
-      "usage4": "Set your model parameters on the AI configuration page",
-      "usage5": "Regularly export your data to prevent data loss",
-      "versionTitle": "Version Information",
-      "versionInfo": "SnapFit AI"
     }
   }
 }

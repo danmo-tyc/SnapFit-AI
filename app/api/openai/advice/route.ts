@@ -1,5 +1,6 @@
 import { OpenAICompatibleClient } from "@/lib/openai-client"
 import type { DailyLog, UserProfile, AIConfig } from "@/lib/types"
+import { formatDailyStatusForAI } from "@/lib/utils"
 
 export async function POST(req: Request) {
   try {
@@ -53,7 +54,15 @@ export async function POST(req: Request) {
       }
       ${userProfile.targetWeight ? `- 目标体重: ${userProfile.targetWeight} kg` : ""}
       ${userProfile.targetCalories ? `- 目标每日卡路里: ${userProfile.targetCalories} kcal` : ""}
-      ${userProfile.notes ? `- 其他注意事项: ${userProfile.notes}` : ""}
+      ${(() => {
+        const notesContent = [
+          userProfile.notes,
+          userProfile.professionalMode && userProfile.medicalHistory ? `\n\n详细医疗信息:\n${userProfile.medicalHistory}` : '',
+          userProfile.professionalMode && userProfile.lifestyle ? `\n\n生活方式信息:\n${userProfile.lifestyle}` : '',
+          userProfile.professionalMode && userProfile.healthAwareness ? `\n\n健康认知与期望:\n${userProfile.healthAwareness}` : ''
+        ].filter(Boolean).join('');
+        return notesContent ? `- 其他注意事项: ${notesContent}` : '';
+      })()}
 
       今日健康数据 (${dailyLog.date}):
       - 总卡路里摄入: ${dailyLog.summary.totalCaloriesConsumed.toFixed(0)} kcal
@@ -83,7 +92,13 @@ export async function POST(req: Request) {
         )
         .join("\n")}
 
+      ${dailyLog.dailyStatus ? `
+      每日状态:
+      ${formatDailyStatusForAI(dailyLog.dailyStatus)}
+      ` : ""}
+
       请提供个性化、可操作的健康建议，包括饮食和运动方面的具体建议。建议应该是积极、鼓励性的，并且与用户的健康目标相符。
+      ${dailyLog.dailyStatus ? "请特别考虑用户的每日状态（压力、心情、健康状况、睡眠质量）对建议的影响。" : ""}
       请用中文回答，不超过300字，不需要分段，直接给出建议内容。
     `
 

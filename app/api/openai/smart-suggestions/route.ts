@@ -1,5 +1,6 @@
 import { OpenAICompatibleClient } from "@/lib/openai-client"
 import type { DailyLog, UserProfile } from "@/lib/types"
+import { formatDailyStatusForAI } from "@/lib/utils"
 
 export async function POST(req: Request) {
   try {
@@ -45,7 +46,8 @@ export async function POST(req: Request) {
           name: entry.exercise_name,
           calories: entry.calories_burned,
           duration: entry.duration_minutes
-        }))
+        })),
+        dailyStatus: formatDailyStatusForAI(dailyLog.dailyStatus)
       },
       profile: {
         age: userProfile.age,
@@ -54,15 +56,23 @@ export async function POST(req: Request) {
         weight: userProfile.weight,
         activityLevel: userProfile.activityLevel,
         goal: userProfile.goal,
-        targetWeight: userProfile.targetWeight
+        targetWeight: userProfile.targetWeight,
+        targetCalories: userProfile.targetCalories,
+        notes: [
+          userProfile.notes,
+          userProfile.professionalMode && userProfile.medicalHistory ? `\n\n医疗信息: ${userProfile.medicalHistory}` : '',
+          userProfile.professionalMode && userProfile.lifestyle ? `\n\n生活方式: ${userProfile.lifestyle}` : '',
+          userProfile.professionalMode && userProfile.healthAwareness ? `\n\n健康认知: ${userProfile.healthAwareness}` : ''
+        ].filter(Boolean).join('') || undefined
       },
-      recent: recentLogs ? recentLogs.slice(0, 7).map(log => ({
+      recent: recentLogs ? recentLogs.slice(0, 7).map((log: any) => ({
         date: log.date,
         calories: log.summary.totalCalories,
         exercise: log.summary.totalExerciseCalories,
         weight: log.weight,
-        foodNames: log.foodEntries.map(entry => entry.food_name).slice(0, 5), // 只取前5个食物名称
-        exerciseNames: log.exerciseEntries.map(entry => entry.exercise_name).slice(0, 3) // 只取前3个运动名称
+        foodNames: log.foodEntries.map((entry: any) => entry.food_name).slice(0, 5), // 只取前5个食物名称
+        exerciseNames: log.exerciseEntries.map((entry: any) => entry.exercise_name).slice(0, 3), // 只取前3个运动名称
+        dailyStatus: formatDailyStatusForAI(log.dailyStatus)
       })) : []
     }
 
@@ -78,6 +88,7 @@ export async function POST(req: Request) {
         2. 热量平衡与目标匹配度
         3. 食物选择的营养密度分析
         4. 微量营养素潜在缺口识别
+        5. 每日状态对营养需求的影响（压力、心情、健康状况、睡眠质量）
 
         请提供3-4个具体的营养优化建议，每个建议需包含：
         - 明确的营养学依据
@@ -110,6 +121,7 @@ export async function POST(req: Request) {
         2. 有氧vs无氧运动配比优化（基于用户目标）
         3. 运动时机与代谢窗口利用
         4. 运动强度区间建议（基于心率储备）
+        5. 每日状态对运动能力的影响（压力水平、心情状态、健康状况、睡眠质量）
 
         请提供2-3个基于运动科学的训练优化建议：
         - 具体的运动类型、强度、时长
@@ -174,6 +186,7 @@ export async function POST(req: Request) {
         2. 行为一致性评估（基于7天数据趋势）
         3. 习惯形成的关键触发点分析
         4. 行为改变的阻力因素识别
+        5. 心理状态对行为的影响（压力、心情对饮食和运动习惯的影响）
 
         请提供2-3个基于行为科学的习惯优化建议：
         - 具体的行为改变策略（基于行为链分析）
@@ -206,6 +219,7 @@ export async function POST(req: Request) {
         2. 运动时机与代谢窗口的匹配
         3. 营养素时序分配的优化空间
         4. 睡眠-代谢-营养的协调性
+        5. 睡眠时间和质量对时机安排的影响（基于睡眠数据优化作息）
 
         请提供2-3个基于时间生物学的时机优化建议：
         - 最佳进餐和运动时间窗口
@@ -225,6 +239,39 @@ export async function POST(req: Request) {
             }
           ],
           "summary": "时机协调专业评价"
+        }
+      `,
+
+      wellness: `
+        你是一位整体健康专家，专精压力管理、睡眠优化和心理健康的综合调节。
+
+        数据：${JSON.stringify(dataSummary, null, 2)}
+
+        专业分析要点：
+        1. 压力水平对代谢和食欲的影响评估
+        2. 心情状态与饮食行为的关联分析
+        3. 睡眠质量对恢复和代谢的影响
+        4. 整体健康状况的综合评价
+        5. 压力-睡眠-营养-运动的协调优化
+
+        请提供2-3个基于整体健康的优化建议：
+        - 压力管理和情绪调节策略
+        - 睡眠质量改善方案
+        - 心理健康与身体健康的协调方法
+
+        JSON格式：
+        {
+          "category": "整体健康优化",
+          "priority": "high|medium|low",
+          "suggestions": [
+            {
+              "title": "整体健康方案",
+              "description": "基于心理生理学的综合健康优化策略",
+              "actionable": true,
+              "icon": "🌟"
+            }
+          ],
+          "summary": "整体健康状况专业评价"
         }
       `
     }
@@ -256,8 +303,8 @@ export async function POST(req: Request) {
     const allSuggestions = await Promise.all(suggestionPromises)
 
     // 按优先级排序
-    const priorityOrder = { high: 3, medium: 2, low: 1 }
-    allSuggestions.sort((a, b) => 
+    const priorityOrder: Record<string, number> = { high: 3, medium: 2, low: 1 }
+    allSuggestions.sort((a: any, b: any) =>
       (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0)
     )
 

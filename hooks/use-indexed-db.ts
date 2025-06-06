@@ -22,12 +22,16 @@ export function useIndexedDB(storeName: string): IndexedDBHook {
   useEffect(() => {
     const initDB = async () => {
       try {
-        const request = window.indexedDB.open("healthApp", 1)
+        const request = window.indexedDB.open("healthApp", 2)
 
         request.onupgradeneeded = (event) => {
           const db = (event.target as IDBOpenDBRequest).result
           if (!db.objectStoreNames.contains(storeName)) {
             db.createObjectStore(storeName)
+          }
+          // 确保aiMemories存储也被创建
+          if (!db.objectStoreNames.contains("aiMemories")) {
+            db.createObjectStore("aiMemories")
           }
         }
 

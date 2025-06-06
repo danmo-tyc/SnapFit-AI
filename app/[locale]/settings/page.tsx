@@ -8,11 +8,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useIndexedDB } from "@/hooks/use-indexed-db"
+import { useAIMemory } from "@/hooks/use-ai-memory"
 import type { AIConfig, ModelConfig } from "@/lib/types"
 import type { OpenAIModel } from "@/lib/openai-client"
 import {
@@ -42,6 +45,11 @@ const defaultUserProfile = {
   bmrFormula: "mifflin-st-jeor" as "mifflin-st-jeor" | "harris-benedict",
   bmrCalculationBasis: "totalWeight" as "totalWeight" | "leanBodyMass",
   bodyFatPercentage: undefined as number | undefined,
+  // 专业模式字段
+  professionalMode: false,
+  medicalHistory: undefined as string | undefined,
+  lifestyle: undefined as string | undefined,
+  healthAwareness: undefined as string | undefined,
 }
 
 const defaultAIConfig: AIConfig = {
@@ -76,7 +84,131 @@ function SettingsContent() {
   })
 
   const { clearAllData } = useIndexedDB("healthLogs")
+  const { memories, updateMemory, clearMemory, clearAllMemories } = useAIMemory()
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // 记忆编辑状态管理
+  const [editingMemories, setEditingMemories] = useState<Record<string, string>>({})
+  const [memoryUpdateTimeouts, setMemoryUpdateTimeouts] = useState<Record<string, NodeJS.Timeout>>({})
+  const [savingMemories, setSavingMemories] = useState<Record<string, boolean>>({})
+
+  // 初始化编辑状态
+  useEffect(() => {
+    const initialEditingState: Record<string, string> = {}
+    Object.entries(memories).forEach(([expertId, memory]) => {
+      initialEditingState[expertId] = memory.content
+    })
+    setEditingMemories(initialEditingState)
+  }, [memories])
+
+  // 处理记忆内容变化
+  const handleMemoryContentChange = useCallback((expertId: string, content: string) => {
+    // 更新本地编辑状态
+    setEditingMemories(prev => ({
+      ...prev,
+      [expertId]: content
+    }))
+
+    // 清除之前的定时器
+    if (memoryUpdateTimeouts[expertId]) {
+      clearTimeout(memoryUpdateTimeouts[expertId])
+    }
+
+    // 设置新的定时器 - 3秒防抖，给用户足够时间输入
+    const timeoutId = setTimeout(async () => {
+      try {
+        setSavingMemories(prev => ({ ...prev, [expertId]: true }))
+
+        await updateMemory({
+          expertId,
+          newContent: content,
+          reason: "用户手动编辑"
+        })
+
+        toast({
+          title: t('ai.memoryManagement.memorySaved'),
+          description: t('ai.memoryManagement.memorySavedDescription'),
+        })
+      } catch (error) {
+        console.error("保存记忆失败:", error)
+        toast({
+          title: t('ai.memoryManagement.saveFailed'),
+          description: t('ai.memoryManagement.saveFailedDescription'),
+          variant: "destructive",
+        })
+      } finally {
+        setSavingMemories(prev => ({ ...prev, [expertId]: false }))
+
+        // 清除已完成的定时器
+        setMemoryUpdateTimeouts(prev => {
+          const newTimeouts = { ...prev }
+          delete newTimeouts[expertId]
+          return newTimeouts
+        })
+      }
+    }, 3000) // 3秒防抖
+
+    // 更新定时器记录
+    setMemoryUpdateTimeouts(prev => ({
+      ...prev,
+      [expertId]: timeoutId
+    }))
+  }, [updateMemory, memoryUpdateTimeouts, toast])
+
+  // 清理定时器
+  useEffect(() => {
+    return () => {
+      Object.values(memoryUpdateTimeouts).forEach(timeoutId => {
+        clearTimeout(timeoutId)
+      })
+    }
+  }, [memoryUpdateTimeouts])
+
+  // 检查是否有未保存的更改
+  const hasUnsavedChanges = useCallback((expertId: string) => {
+    const originalContent = memories[expertId]?.content || ""
+    const editingContent = editingMemories[expertId] || ""
+    return originalContent !== editingContent
+  }, [memories, editingMemories])
+
+  // 手动保存记忆
+  const handleManualSave = useCallback(async (expertId: string) => {
+    const content = editingMemories[expertId] || ""
+
+    // 清除自动保存定时器
+    if (memoryUpdateTimeouts[expertId]) {
+      clearTimeout(memoryUpdateTimeouts[expertId])
+      setMemoryUpdateTimeouts(prev => {
+        const newTimeouts = { ...prev }
+        delete newTimeouts[expertId]
+        return newTimeouts
+      })
+    }
+
+    try {
+      setSavingMemories(prev => ({ ...prev, [expertId]: true }))
+
+      await updateMemory({
+        expertId,
+        newContent: content,
+        reason: "用户手动保存"
+      })
+
+      toast({
+        title: t('ai.memoryManagement.memorySaved'),
+        description: t('ai.memoryManagement.memorySavedDescription'),
+      })
+    } catch (error) {
+      console.error("保存记忆失败:", error)
+      toast({
+        title: t('ai.memoryManagement.saveFailed'),
+        description: t('ai.memoryManagement.saveFailedDescription'),
+        variant: "destructive",
+      })
+    } finally {
+      setSavingMemories(prev => ({ ...prev, [expertId]: false }))
+    }
+  }, [editingMemories, memoryUpdateTimeouts, updateMemory, toast])
 
   // 使用独立的表单状态，避免与 localStorage 状态冲突
   const [formData, setFormData] = useState(defaultUserProfile)
@@ -136,6 +268,23 @@ function SettingsContent() {
       ...prev,
       [name]: value,
     }))
+  }, [])
+
+  // 处理Textarea变化
+  const handleTextareaChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }, [])
+
+  // 处理专业模式切换
+  const handleProfessionalModeChange = useCallback((checked: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      professionalMode: checked,
+    }));
   }, [])
 
   // 处理AI配置变化
@@ -294,8 +443,8 @@ function SettingsContent() {
       const model = aiFormData[modelType]
       if (!model.name || !model.baseUrl || !model.apiKey) {
         toast({
-          title: "配置不完整",
-          description: "请先填写完整的模型配置",
+          title: t('ai.configIncomplete'),
+          description: t('ai.fillAllFields'),
           variant: "destructive",
         })
         return
@@ -315,16 +464,16 @@ function SettingsContent() {
 
         if (response.ok) {
           toast({
-            title: "测试成功",
-            description: `${modelType} 模型连接正常`,
+            title: t('ai.testSuccess'),
+            description: t('ai.modelConnectionOk', { modelType }),
           })
         } else {
           throw new Error("测试失败")
         }
       } catch (error) {
         toast({
-          title: "测试失败",
-          description: `${modelType} 模型连接失败，请检查配置`,
+          title: t('ai.testFailed'),
+          description: t('ai.modelConnectionFailed', { modelType }),
           variant: "destructive",
         })
       }
@@ -336,7 +485,7 @@ function SettingsContent() {
   const handleExportData = useCallback(async () => {
     try {
       // 获取所有健康日志
-      const db = await window.indexedDB.open("healthApp", 1)
+      const db = await window.indexedDB.open("healthApp", 2)
       const request = new Promise((resolve, reject) => {
         db.onsuccess = (event) => {
           const database = (event.target as IDBOpenDBRequest).result
@@ -361,11 +510,43 @@ function SettingsContent() {
 
       const healthLogs = await request
 
+      // 获取AI记忆数据
+      const aiMemoriesRequest = new Promise((resolve, reject) => {
+        const db2 = window.indexedDB.open("healthApp", 2)
+        db2.onsuccess = (event) => {
+          const database = (event.target as IDBOpenDBRequest).result
+          if (!database.objectStoreNames.contains("aiMemories")) {
+            resolve({})
+            return
+          }
+
+          const transaction = database.transaction(["aiMemories"], "readonly")
+          const objectStore = transaction.objectStore("aiMemories")
+          const allMemories: Record<string, any> = {}
+
+          objectStore.openCursor().onsuccess = (cursorEvent) => {
+            const cursor = (cursorEvent.target as IDBRequest).result
+            if (cursor) {
+              allMemories[cursor.key as string] = cursor.value
+              cursor.continue()
+            } else {
+              resolve(allMemories)
+            }
+          }
+
+          transaction.onerror = () => resolve({}) // 如果出错，返回空对象
+        }
+        db2.onerror = () => resolve({}) // 如果出错，返回空对象
+      })
+
+      const aiMemories = await aiMemoriesRequest
+
       // 创建导出对象
       const exportData = {
         userProfile,
         aiConfig,
         healthLogs,
+        aiMemories,
       }
 
       // 创建并下载 JSON 文件
@@ -422,7 +603,7 @@ function SettingsContent() {
           }
 
           // 更新健康日志
-          const db = await window.indexedDB.open("healthApp", 1)
+          const db = await window.indexedDB.open("healthApp", 2)
           db.onsuccess = (event) => {
             const database = (event.target as IDBOpenDBRequest).result
             const transaction = database.transaction(["healthLogs"], "readwrite")
@@ -436,11 +617,79 @@ function SettingsContent() {
               objectStore.add(value, key)
             })
 
-            transaction.oncomplete = () => {
-              toast({
-                title: "导入成功",
-                description: "您的健康数据已成功导入",
-              })
+            transaction.oncomplete = async () => {
+              // 导入AI记忆数据（如果存在）
+              if (importedData.aiMemories && Object.keys(importedData.aiMemories).length > 0) {
+                try {
+                  const db2 = await window.indexedDB.open("healthApp", 2)
+                  db2.onsuccess = (event2) => {
+                    const database2 = (event2.target as IDBOpenDBRequest).result
+
+                    // 确保aiMemories对象存储存在
+                    if (!database2.objectStoreNames.contains("aiMemories")) {
+                      // 如果不存在，需要升级数据库版本
+                      database2.close()
+                      const upgradeRequest = window.indexedDB.open("healthApp", 2)
+                      upgradeRequest.onupgradeneeded = (upgradeEvent) => {
+                        const upgradeDb = (upgradeEvent.target as IDBOpenDBRequest).result
+                        if (!upgradeDb.objectStoreNames.contains("aiMemories")) {
+                          upgradeDb.createObjectStore("aiMemories")
+                        }
+                      }
+                      upgradeRequest.onsuccess = (upgradeEvent) => {
+                        const upgradeDb = (upgradeEvent.target as IDBOpenDBRequest).result
+                        const memoryTransaction = upgradeDb.transaction(["aiMemories"], "readwrite")
+                        const memoryStore = memoryTransaction.objectStore("aiMemories")
+
+                        // 清除现有AI记忆
+                        memoryStore.clear()
+
+                        // 添加导入的AI记忆
+                        Object.entries(importedData.aiMemories).forEach(([key, value]) => {
+                          memoryStore.add(value, key)
+                        })
+
+                        memoryTransaction.oncomplete = () => {
+                          toast({
+                            title: "导入成功",
+                            description: "您的健康数据和AI记忆已成功导入",
+                          })
+                        }
+                      }
+                    } else {
+                      const memoryTransaction = database2.transaction(["aiMemories"], "readwrite")
+                      const memoryStore = memoryTransaction.objectStore("aiMemories")
+
+                      // 清除现有AI记忆
+                      memoryStore.clear()
+
+                      // 添加导入的AI记忆
+                      Object.entries(importedData.aiMemories).forEach(([key, value]) => {
+                        memoryStore.add(value, key)
+                      })
+
+                      memoryTransaction.oncomplete = () => {
+                        toast({
+                          title: t('data.importSuccessWithMemoryTitle'),
+                          description: t('data.importSuccessWithMemoryDescription'),
+                        })
+                      }
+                    }
+                  }
+                } catch (memoryError) {
+                  console.warn("导入AI记忆失败:", memoryError)
+                  toast({
+                    title: t('data.partialImportSuccessTitle'),
+                    description: t('data.partialImportSuccessDescription'),
+                  })
+                }
+              } else {
+                toast({
+                  title: t('data.importSuccessTitle'),
+                  description: t('data.importSuccessDescription'),
+                })
+              }
+
               // 重置文件输入
               if (event.target) {
                 (event.target as HTMLInputElement).value = ""
@@ -471,14 +720,14 @@ function SettingsContent() {
     try {
       await clearAllData()
       toast({
-        title: "清除成功",
-        description: "所有健康日志数据已清除",
+        title: t('data.clearSuccessTitle'),
+        description: t('data.clearSuccessDescription'),
       })
     } catch (error) {
       console.error("清除数据失败:", error)
       toast({
-        title: "清除失败",
-        description: "无法清除您的健康数据",
+        title: t('data.clearErrorTitle'),
+        description: t('data.clearErrorDescription'),
         variant: "destructive",
       })
     }
@@ -720,15 +969,80 @@ function SettingsContent() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="notes">{t('goals.notes')}</Label>
-                <Input
-                  id="notes"
-                  name="notes"
-                  value={formData.notes || ""}
-                  onChange={handleInputChange}
-                  placeholder={t('goals.notesPlaceholder')}
-                />
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="notes">{t('goals.notes')}</Label>
+                  <p className="text-sm font-medium text-muted-foreground">{t('goals.notesSubtitle')}</p>
+                </div>
+                <div className="space-y-2">
+                  <Textarea
+                    id="notes"
+                    name="notes"
+                    value={formData.notes || ""}
+                    onChange={handleTextareaChange}
+                    placeholder={t('goals.notesPlaceholder')}
+                    className="min-h-[120px] text-base"
+                  />
+                  <div className="text-xs text-muted-foreground whitespace-pre-line">
+                    {t('goals.notesDescription')}
+                  </div>
+                </div>
+              </div>
+
+              {/* 专业模式切换 */}
+              <div className="space-y-4 pt-4 border-t">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label htmlFor="professional-mode">{t('goals.professionalMode')}</Label>
+                    <p className="text-sm text-muted-foreground">{t('goals.professionalModeDescription')}</p>
+                  </div>
+                  <Switch
+                    id="professional-mode"
+                    checked={formData.professionalMode || false}
+                    onCheckedChange={handleProfessionalModeChange}
+                  />
+                </div>
+
+                {/* 专业模式字段 */}
+                {formData.professionalMode && (
+                  <div className="space-y-6 pt-4">
+                    <div className="space-y-3">
+                      <Label htmlFor="medicalHistory">{t('goals.medicalHistory')}</Label>
+                      <Textarea
+                        id="medicalHistory"
+                        name="medicalHistory"
+                        value={formData.medicalHistory || ""}
+                        onChange={handleTextareaChange}
+                        placeholder={t('goals.medicalHistoryPlaceholder')}
+                        className="min-h-[150px] text-base"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="lifestyle">{t('goals.lifestyle')}</Label>
+                      <Textarea
+                        id="lifestyle"
+                        name="lifestyle"
+                        value={formData.lifestyle || ""}
+                        onChange={handleTextareaChange}
+                        placeholder={t('goals.lifestylePlaceholder')}
+                        className="min-h-[150px] text-base"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="healthAwareness">{t('goals.healthAwareness')}</Label>
+                      <Textarea
+                        id="healthAwareness"
+                        name="healthAwareness"
+                        value={formData.healthAwareness || ""}
+                        onChange={handleTextareaChange}
+                        placeholder={t('goals.healthAwarenessPlaceholder')}
+                        className="min-h-[150px] text-base"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
             <CardFooter>
@@ -872,6 +1186,171 @@ function SettingsContent() {
             </div>
 
             <Button onClick={handleSaveAIConfig}>{t('ai.saveConfig')}</Button>
+
+            {/* AI记忆管理 */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>{t('ai.memoryManagement.title')}</CardTitle>
+                <CardDescription>
+                  {t('ai.memoryManagement.description')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {Object.entries(memories).length === 0 ? (
+                  <p className="text-sm text-muted-foreground">{t('ai.memoryManagement.noMemoryData')}</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(memories).map(([expertId, memory]) => {
+                      const getExpertName = (id: string) => {
+                        return t(`ai.memoryManagement.expertNames.${id}`) || id
+                      }
+
+                      return (
+                        <Card key={expertId} className="border border-slate-200 dark:border-slate-700 shadow-sm">
+                          <CardHeader className="pb-2 px-4 pt-3">
+                            <div className="flex items-center justify-between">
+                              <CardTitle className="text-sm font-medium">
+                                {getExpertName(expertId)}
+                              </CardTitle>
+                              <div className="text-xs text-muted-foreground">
+                                {memory.content.length}/500
+                              </div>
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(memory.lastUpdated).toLocaleDateString('zh-CN')}
+                            </div>
+                          </CardHeader>
+                          <CardContent className="px-4 pb-3">
+                            <div className="space-y-2">
+                              <div className="relative">
+                                <Textarea
+                                  value={editingMemories[expertId] || ""}
+                                  onChange={(e) => {
+                                    if (e.target.value.length <= 500) {
+                                      handleMemoryContentChange(expertId, e.target.value)
+                                    }
+                                  }}
+                                  placeholder={t('ai.memoryManagement.memoryPlaceholder')}
+                                  className="min-h-[60px] resize-none text-sm"
+                                  maxLength={500}
+                                />
+                                {/* 保存状态指示器 */}
+                                {savingMemories[expertId] && (
+                                  <div className="absolute top-1 right-1 flex items-center space-x-1 text-xs text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                                    <div className="w-2 h-2 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                    <span>{t('ai.memoryManagement.saving')}</span>
+                                  </div>
+                                )}
+                                {hasUnsavedChanges(expertId) && !savingMemories[expertId] && (
+                                  <div className="absolute top-1 right-1 flex items-center space-x-1 text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                                    <div className="w-1.5 h-1.5 bg-amber-600 rounded-full"></div>
+                                    <span>{t('ai.memoryManagement.unsaved')}</span>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <div className="text-xs text-muted-foreground">
+                                  {(editingMemories[expertId] || "").length > 400 && (
+                                    <span className="text-amber-600">
+                                      即将达到上限
+                                    </span>
+                                  )}
+                                  {hasUnsavedChanges(expertId) && (
+                                    <span className="text-amber-600">
+                                      3秒后自动保存
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex space-x-1">
+                                  {hasUnsavedChanges(expertId) && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleManualSave(expertId)}
+                                      disabled={savingMemories[expertId]}
+                                      className="h-6 px-2 text-xs"
+                                    >
+                                      {savingMemories[expertId] ? t('ai.memoryManagement.saving') : t('common.save')}
+                                    </Button>
+                                  )}
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      clearMemory(expertId).then(() => {
+                                        // 同时清空编辑状态
+                                        setEditingMemories(prev => ({
+                                          ...prev,
+                                          [expertId]: ""
+                                        }))
+                                        toast({
+                                          title: t('ai.memoryManagement.allMemoriesCleared'),
+                                          description: `${getExpertName(expertId)}的记忆已清空`,
+                                        })
+                                      }).catch((error) => {
+                                        toast({
+                                          title: t('ai.memoryManagement.clearFailed'),
+                                          description: error.message,
+                                          variant: "destructive",
+                                        })
+                                      })
+                                    }}
+                                    className="h-6 px-2 text-xs"
+                                  >
+                                    {t('common.clear')}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {Object.entries(memories).length > 0 && (
+                  <div className="pt-4 border-t">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="sm">
+                          {t('ai.memoryManagement.clearAllMemories')}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>{t('ai.memoryManagement.confirmClearTitle')}</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {t('ai.memoryManagement.confirmClearDescription')}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>{t('ai.memoryManagement.cancel')}</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => {
+                              clearAllMemories().then(() => {
+                                toast({
+                                  title: t('ai.memoryManagement.allMemoriesCleared'),
+                                  description: t('ai.memoryManagement.allMemoriesClearedDescription'),
+                                })
+                              }).catch((error) => {
+                                toast({
+                                  title: t('ai.memoryManagement.clearFailed'),
+                                  description: error.message,
+                                  variant: "destructive",
+                                })
+                              })
+                            }}
+                          >
+                            {t('ai.memoryManagement.confirmClear')}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
           </div>
         </TabsContent>

@@ -36,36 +36,51 @@ export function SmartSuggestions({ suggestions, isLoading, onRefresh, currentDat
     "代谢效率提升": "metabolismEnhancement",
     "代谢调节优化": "metabolismEnhancement", // 别名映射
     "行为习惯优化": "behaviorOptimization",
-    "时机优化策略": "timingOptimization"
+    "时机优化策略": "timingOptimization",
+    "整体健康优化": "overallHealthOptimization",
+    "睡眠优化": "sleepOptimization",
+    "压力管理": "stressManagement",
+    "水分补充": "hydrationOptimization",
+    "心理健康": "mentalHealth",
+    // 英文键名映射（API返回的键名）
+    "nutrition": "nutritionOptimization",
+    "exercise": "exerciseOptimization",
+    "metabolism": "metabolismEnhancement",
+    "behavior": "behaviorOptimization",
+    "timing": "timingOptimization",
+    "wellness": "overallHealthOptimization"
   }
 
   // 获取翻译后的类别名称
   const getCategoryDisplayName = (categoryName: string) => {
-    // 首先尝试映射到英文键
-    const keyName = categoryKeyMap[categoryName]
-
-    if (keyName) {
-      try {
-        const translated = tChatSuggestions(`categories.${keyName}`)
-        if (translated && translated !== `categories.${keyName}`) {
-          return translated
-        }
-      } catch (error) {
-        // 翻译失败，继续尝试其他方法
-      }
+    // 直接映射常见的分类名称
+    const directMapping: Record<string, string> = {
+      "营养配比优化": "营养配比优化",
+      "运动处方优化": "运动处方优化",
+      "代谢调节优化": "代谢调节优化",
+      "代谢效率提升": "代谢效率提升",
+      "行为习惯优化": "行为习惯优化",
+      "时机优化策略": "时机优化策略",
+      "整体健康优化": "整体健康优化",
+      "睡眠优化": "睡眠优化",
+      "压力管理": "压力管理",
+      "水分补充": "水分补充",
+      "心理健康": "心理健康",
+      // API返回的英文键名
+      "nutrition": "营养配比优化",
+      "exercise": "运动处方优化",
+      "metabolism": "代谢调节优化",
+      "behavior": "行为习惯优化",
+      "timing": "时机优化策略",
+      "wellness": "整体健康优化"
     }
 
-    // 如果映射失败，尝试直接使用原始名称作为键
-    try {
-      const directTranslated = tChatSuggestions(`categories.${categoryName}`)
-      if (directTranslated && directTranslated !== `categories.${categoryName}`) {
-        return directTranslated
-      }
-    } catch (error) {
-      // 直接翻译也失败
+    // 直接返回映射的中文名称
+    if (directMapping[categoryName]) {
+      return directMapping[categoryName]
     }
 
-    // 最后返回原始名称
+    // 如果没有映射，返回原始名称
     return categoryName
   }
 
@@ -256,9 +271,32 @@ export function SmartSuggestions({ suggestions, isLoading, onRefresh, currentDat
                         <span className="text-xs flex-shrink-0">{suggestion.icon}</span>
                         <div className="min-w-0 flex-1">
                           <h4 className="font-medium text-xs">{suggestion.title}</h4>
-                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                            {suggestion.description}
-                          </p>
+                          <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed space-y-1">
+                            {suggestion.description.split('\n').map((line, lineIndex) => {
+                              // 跳过空行
+                              if (!line.trim()) {
+                                return <div key={lineIndex} className="h-1" />
+                              }
+
+                              // 处理基本的Markdown格式
+                              const processedLine = line.trim()
+                                .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>') // 粗体
+                                .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>') // 斜体
+                                .replace(/`(.*?)`/g, '<code class="bg-muted px-1 py-0.5 rounded text-xs font-mono">$1</code>') // 代码
+                                .replace(/^- (.*)/, '<span class="flex items-start"><span class="text-primary mr-1 flex-shrink-0">•</span><span class="flex-1">$1</span></span>') // 列表项
+                                .replace(/^(\d+)\. (.*)/, '<span class="flex items-start"><span class="text-primary mr-1 flex-shrink-0 font-medium">$1.</span><span class="flex-1">$2</span></span>') // 数字列表
+
+                              return (
+                                <div key={lineIndex} className="leading-relaxed">
+                                  {processedLine.includes('<') ? (
+                                    <span dangerouslySetInnerHTML={{ __html: processedLine }} />
+                                  ) : (
+                                    <span>{processedLine}</span>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
                           {suggestion.actionable && (
                             <Badge variant="outline" className="mt-1 text-xs px-1 py-0">
                               {tChatSuggestions('actionable')}

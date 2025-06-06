@@ -91,6 +91,20 @@ export interface SmartSuggestionsResponse {
   dataDate: string
 }
 
+// 每日状态记录类型
+export interface DailyStatus {
+  stress: number // 压力水平 1-6
+  mood: number // 心情状态 1-6
+  health: number // 健康状况 1-6
+  stressNotes?: string // 压力补充说明
+  moodNotes?: string // 心情补充说明
+  healthNotes?: string // 健康状况补充说明
+  bedTime?: string // 睡眠时间 (HH:MM格式)
+  wakeTime?: string // 起床时间 (HH:MM格式)
+  sleepQuality?: number // 睡眠质量 1-6
+  sleepNotes?: string // 睡眠补充说明
+}
+
 // 日志类型
 export interface DailyLog {
   date: string
@@ -102,6 +116,7 @@ export interface DailyLog {
   calculatedBMR?: number // 新增：当日计算的BMR
   calculatedTDEE?: number // 新增：当日计算的TDEE
   tefAnalysis?: TEFAnalysis // 新增：TEF分析结果
+  dailyStatus?: DailyStatus // 新增：每日状态记录
 }
 
 // 用户配置类型
@@ -118,6 +133,11 @@ export interface UserProfile {
   bmrFormula?: 'mifflin-st-jeor' | 'harris-benedict' // 新增：BMR计算公式选择
   bmrCalculationBasis?: 'totalWeight' | 'leanBodyMass' // 新增：BMR计算依据
   bodyFatPercentage?: number // 新增：体脂率，用于去脂体重计算
+  // 专业模式字段
+  professionalMode?: boolean // 是否启用专业模式
+  medicalHistory?: string // 现有疾病、过敏、药物/补充剂、家族病史
+  lifestyle?: string // 食物偏好/禁忌、睡眠质量、压力水平、烟酒习惯
+  healthAwareness?: string // 健康认知与目标期望
 }
 
 // 模型配置类型
@@ -132,4 +152,28 @@ export interface AIConfig {
   agentModel: ModelConfig // 工作模型/Agents模型
   chatModel: ModelConfig // 对话模型
   visionModel: ModelConfig // 视觉模型
+}
+
+// AI助手记忆类型
+export interface AIMemory {
+  expertId: string // 对应专家角色ID
+  content: string // 记忆内容，限制500字
+  lastUpdated: string // 最后更新时间
+  version: number // 版本号，用于跟踪更新
+}
+
+// AI记忆更新请求类型
+export interface AIMemoryUpdateRequest {
+  expertId: string
+  newContent: string
+  reason?: string // 更新原因
+}
+
+// 扩展的消息类型，支持思考过程
+export interface ExtendedMessage {
+  id: string
+  role: "user" | "assistant" | "system"
+  content: string
+  reasoning_content?: string // 思考过程内容
+  timestamp?: string
 }

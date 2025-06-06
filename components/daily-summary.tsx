@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import type { DailySummaryType, TEFAnalysis } from "@/lib/types"
-import { Utensils, Flame, Sigma, Calculator, BedDouble, Target, TrendingUp, TrendingDown, Minus, PieChart, ListChecks, Info, Sparkles, Brain, Zap, ExternalLink } from "lucide-react"
+import { Utensils, Flame, Sigma, Calculator, BedDouble, Target, TrendingUp, TrendingDown, Minus, PieChart, Info, Sparkles, Brain, Zap, ExternalLink } from "lucide-react"
 import { useTranslation } from "@/hooks/use-i18n"
 import Link from "next/link"
 
@@ -138,17 +138,19 @@ export function DailySummary({ summary, calculatedBMR, calculatedTDEE, tefAnalys
         )}
 
         {/* TEF 分析 */}
-        {(tefAnalysis || tefAnalysisCountdown) && (
+        {(tefAnalysis || (tefAnalysisCountdown && tefAnalysisCountdown > 0)) && (
           <div className="space-y-3 pt-4 border-t">
-            <h4 className="text-sm font-medium flex items-center">
-              <Zap className="mr-2 h-4 w-4 text-primary" />
-              {t('tef.title')}
-              {tefAnalysisCountdown && tefAnalysisCountdown > 0 && (
-                <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full dark:bg-blue-900/30 dark:text-blue-300">
-                  {t('tef.analyzing')} {tefAnalysisCountdown}s
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium flex items-center">
+                <Zap className="mr-2 h-4 w-4 text-primary" />
+                食物热效应 (TEF)
+              </h4>
+              {tefAnalysisCountdown > 0 && (
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full dark:bg-blue-900/30 dark:text-blue-300">
+                  分析中 {tefAnalysisCountdown}s
                 </span>
               )}
-            </h4>
+            </div>
             {tefAnalysis && (
               <div className="grid grid-cols-3 gap-2 text-center">
                 <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-2">
@@ -275,25 +277,7 @@ export function DailySummary({ summary, calculatedBMR, calculatedTDEE, tefAnalys
           </div>
         )}
 
-        {/* 微量元素 */}
-        {Object.keys(summary.micronutrients).length > 0 && (
-          <div className="space-y-2 pt-4 border-t">
-            <h4 className="text-sm font-medium flex items-center"><ListChecks className="mr-2 h-4 w-4 text-primary" />{t('micronutrients')}</h4>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-              {Object.entries(summary.micronutrients)
-                .slice(0, 6) // 最多显示6个微量元素
-                .map(([key, value]) => (
-                  <div key={key} className="flex justify-between">
-                    <span className="text-xs capitalize truncate pr-1">{key}</span>
-                    <span className="text-xs whitespace-nowrap">{typeof value === "number" ? value.toFixed(1) : value}</span>
-                  </div>
-                ))}
-            </div>
-             {Object.keys(summary.micronutrients).length > 6 && (
-               <p className="text-xs text-muted-foreground text-center pt-1">...</p>
-            )}
-          </div>
-        )}
+
         </div>
       </div>
     </div>
