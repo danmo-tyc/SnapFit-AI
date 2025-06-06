@@ -1,6 +1,4 @@
-
-
-# SnapFit-AI:  “快速记录”、“系统分析” 和 “智能建议”，您的智能AI健身私教助手。
+# SnapFit-AI: “快速记录”、“系统分析” 和 “智能建议”，您的智能AI健身私教助手。
 
 [![GitHub license](https://img.shields.io/github/license/Feather-2/SnapFit-AI?style=flat-square)](https://github.com/Feather-2/SnapFit-AI/blob/main/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/Feather-2/SnapFit-AI?style=social)](https://github.com/Feather-2/SnapFit-AI/stargazers)
@@ -15,21 +13,29 @@
 
 “Snap” 强调快速、轻松的记录，“Fit” 代表健身与健康。两者结合，SnapFit-AI 寓意着我们的核心使命：**快速记录、系统分析、智能建议。**
 
+## ✨ 最新更新：让AI私教更懂你
+
+我们刚刚完成了一次重大升级，旨在建立更深度的用户理解，为您提供前所未有的个性化体验：
+
+*   **更全面的日常记录**：除了饮食与运动，现在您还可以记录每日的**心情、压力、睡眠质量**和**睡眠时长**，为健康画像增添关键维度。
+*   **深度健康档案 (专业模式)**：通过全新的专业模式，您可以录入过敏史、用药情况、家族病史等详细信息，为AI提供精准建议的基石。
+*   **动态记忆与专家会诊**：AI助手现拥有独立的动态记忆，能在交流中持续学习。您可以同时启用营养师、健身教练等多个AI角色，共享记忆，实现多视角“专家会诊”。
+
 ## 核心功能
 
 SnapFit-AI 旨在通过一套直观而强大的工具赋能用户：
 
-1.  **快速记录（便捷数据录入）：**
-    *   告别手动输入的烦恼。SnapFit-AI 允许您通过自然语言描述或简单上传照片来记录您的饮食和运动。
-    *   我们的先进AI将自动识别并整理相关信息，包括食物种类、运动类型和数量。
+1.  **全面快捷的健康日志 (Comprehensive & Quick Health Journaling)**
+    *   **多维度快速记录**：告别手动输入的烦恼。您不仅可以通过自然语言或照片快速记录饮食和运动，还可以轻松标记每日的**心情、压力、睡眠质量**和**睡眠时长**，并为每项记录添加文字描述，构建完整的健康生活图谱。
+    *   **AI自动解析**：我们的先进AI将自动识别和整理相关信息，包括食物种类、热量、运动类型和时长，让记录过程轻松高效。
 
-2.  **系统分析（全面数据洞察）：**
-    *   除了基础记录，应用程序还会自动计算每项记录的卡路里摄入/消耗。
-    *   它将智能地整合您的个人数据（如体重、年龄等），计算净卡路里、卡路里缺口或盈余，提供清晰、数据驱动的概览，这对于做出明智的健康决策至关重要。
+2.  **多维度的系统分析 (Multi-dimensional Systematic Analysis)**
+    *   **智能数据整合**：应用会自动计算卡路里摄入/消耗，并结合您的个人数据（如体重、年龄）与新增的**情绪、睡眠**等多维度状态，计算净卡路里，提供清晰、数据驱动的健康概览。
+    *   **趋势洞察**：通过整合分析您的长期数据，帮助您发现生活习惯、情绪状态与身体健康之间的潜在关联，做出更明智的健康决策。
 
-3.  **智能建议（个性化指导）：**
-    *   SnapFit-AI 内置了AI聊天功能，它超越了通用建议。
-    *   您的最新饮食和运动数据将无缝暴露给专业的AI助手（例如，营养教练、运动规划师、习惯养成师）。这使您无需手动整理和提供大量上下文信息，即可一键获得量身定制的、与情境相关的建议。
+3.  **超个性化AI私教 (Hyper-Personalized AI Coaching)**
+    *   **深度健康档案**：通过可选的**专业模式**，您可以建立一份详尽的**健康档案**（涵盖疾病、过敏、用药、家族史等）。这份档案是AI提供精准、安全建议的基石。
+    *   **动态记忆与专家会诊**：AI助手拥有**独立的动态记忆**，能在与您的交流中学习和更新关键信息。您可以启用**多位AI专家**（如营养师、健身教练、心理顾问），他们共享您的健康数据和记忆，提供**多视角的“专家会诊”**，帮助您更深入地了解自己，获得真正量身定制的指导。
 
 ## 在线演示
 
@@ -52,8 +58,9 @@ SnapFit-AI 旨在通过一套直观而强大的工具赋能用户：
 
 本项目为开源项目，并根据 [Apache 2.0 许可证](LICENSE) 发布。
 
-
 ---
+
+### 英文版优化
 
 # SnapFit-AI: "Quick Logging," "Systematic Analysis," and "Intelligent Suggestions" – Your Smart AI Fitness Coach Assistant.
 
@@ -70,21 +77,29 @@ Traditional fitness and nutrition tracking often involves cumbersome manual data
 
 “Snap” emphasizes fast, effortless recording, while “Fit” represents fitness and health. Combined, SnapFit-AI embodies our core mission: **Quick Logging, Systematic Analysis, Intelligent Suggestions.**
 
+## ✨ What's New: Making Your AI Coach Understand You Better
+
+We've just rolled out a major update focused on building a deeper understanding of you, delivering an unprecedented level of personalization:
+
+*   **Comprehensive Daily Journaling**: Beyond diet and exercise, you can now log your daily **mood, stress levels, sleep quality,** and **sleep duration**, adding critical dimensions to your health profile.
+*   **In-Depth Health Profile (Professional Mode)**: A new professional mode allows you to input detailed information like allergies, medications, and family medical history, creating a solid foundation for precise AI advice.
+*   **Dynamic Memory & Expert Consultation**: AI assistants now have independent, dynamic memories that learn from your interactions. You can enable multiple AI personas (e.g., nutritionist, fitness coach) who share this memory to provide multi-perspective "expert consultations."
+
 ## Core Features
 
 SnapFit-AI is designed to empower users with a suite of intuitive and powerful tools:
 
-1.  **Quick Logging (Convenient Data Entry):**
-    *   Say goodbye to the hassle of manual input. SnapFit-AI allows you to log your diet and exercise through natural language descriptions or by simply uploading photos.
-    *   Our advanced AI will automatically identify and organize relevant information, including food types, exercise types, and quantities.
+1.  **Comprehensive & Quick Health Journaling**
+    *   **Multi-dimensional Quick Logging**: Say goodbye to the hassle of manual input. You can not only log diet and exercise via natural language or photos but also easily track your daily **mood, stress levels, sleep quality,** and **sleep duration**. Add text descriptions to each entry to build a complete map of your well-being.
+    *   **AI-Powered Parsing**: Our advanced AI automatically identifies and organizes relevant information, including food types, calories, exercise types, and duration, making the logging process effortless and efficient.
 
-2.  **Systematic Analysis (Comprehensive Data Insights):**
-    *   Beyond basic logging, the application automatically calculates calorie intake/expenditure for each entry.
-    *   It intelligently integrates your personal data (e.g., weight, age) to calculate net calories, calorie deficits, or surpluses, providing clear, data-driven overviews crucial for making informed health decisions.
+2.  **Multi-dimensional Systematic Analysis**
+    *   **Intelligent Data Integration**: The application automatically calculates calorie intake/expenditure. It intelligently combines this with your personal data (e.g., weight, age) and new dimensions like **mood and sleep** to provide a clear, data-driven overview of your health.
+    *   **Trend Insights**: By analyzing your long-term data, SnapFit-AI helps you uncover potential correlations between your lifestyle habits, emotional state, and physical health, empowering you to make smarter decisions.
 
-3.  **Intelligent Suggestions (Personalized Guidance):**
-    *   SnapFit-AI features a built-in AI chat function that goes beyond generic advice.
-    *   Your latest diet and exercise data will be seamlessly exposed to specialized AI assistants (e.g., nutrition coach, workout planner, habit formation specialist). This allows you to receive tailored, contextually relevant advice with a single click, without manually organizing and providing extensive contextual information.
+3.  **Hyper-Personalized AI Coaching**
+    *   **In-Depth Health Profile**: With the new optional **Professional Mode**, you can create a detailed **Health Profile** (covering existing conditions, allergies, medications, family history, etc.). This profile serves as the foundation for truly precise and safe AI guidance.
+    *   **Dynamic Memory & Expert Consultation**: Each AI assistant now has **independent, dynamic memory**, learning and updating key information from your conversations. You can enable multiple **specialized AI assistants** (e.g., Nutritionist, Fitness Coach, Well-being Advisor) who share your health data and memories to provide a **multi-perspective 'expert consultation'**, helping you gain deeper self-awareness and receive truly tailored advice.
 
 ## Online Demo
 
@@ -97,12 +112,4 @@ To begin your SnapFit-AI health journey, only a simple, one-time configuration i
 
 ## Disclaimer
 
-**Important Note:** This application is powered by AI technology and is intended solely as a reference tool for personal health management. Please be aware that AI analysis, especially regarding nutritional data, may contain inaccuracies or biases. Your health is paramount. Before making any significant dietary adjustments, exercise decisions, or health-related interventions, we strongly recommend consulting a qualified medical professional, registered dietitian, or certified fitness coach. SnapFit-AI is not a substitute for professional medical or health advice.
-
-## Contribution
-
-We welcome contributions from the community! If you wish to improve SnapFit-AI, please refer to our [Contribution Guidelines](CONTRIBUTING.md) (not yet created).
-
-## License
-
-This project is open-source and released under the [Apache 2.0 License](LICENSE).
+**Important Note:** This application is powered by AI technology and is intended solely as a reference tool for personal health management. Please be aware that AI analysis, especially regarding nutritional data, may contain inaccuracies or biases. Your health is paramount. Before making any significant dietary adjustments, exercise decisions
