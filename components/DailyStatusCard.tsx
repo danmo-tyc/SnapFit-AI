@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { useTranslations } from "next-intl"
 import { DailyStatus } from "@/lib/types"
 import { Heart, Brain, Activity, Moon, Plus, Edit3, Check } from "lucide-react"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface DailyStatusCardProps {
   date: string
@@ -20,6 +21,7 @@ interface DailyStatusCardProps {
 export function DailyStatusCard({ date, initialStatus, onSave }: DailyStatusCardProps) {
   const t = useTranslations('dashboard')
   const tCommon = useTranslations('common')
+  const isMobile = useIsMobile()
 
   const [status, setStatus] = useState<DailyStatus>({
     stress: 3,
@@ -119,45 +121,45 @@ export function DailyStatusCard({ date, initialStatus, onSave }: DailyStatusCard
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-2">
+      <CardContent className={`space-y-${isMobile ? '3' : '2'}`}>
         {/* 第一行：压力、心情、健康 */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-3 gap-2'}`}>
           {statusItems.slice(0, 3).map((item) => {
             const Icon = item.icon
             const isEditing = editingField === item.key
 
             return (
               <div key={item.key} className="relative">
-                <div className="p-1.5 rounded-md border bg-card hover:bg-accent/20 transition-colors group">
+                <div className={`${isMobile ? 'p-3' : 'p-1.5'} rounded-md border bg-card hover:bg-accent/20 transition-colors group`}>
                   {/* 标题和评分 */}
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-1">
-                      <Icon className="h-3 w-3 text-muted-foreground/80" />
-                      <span className="text-xs font-medium text-foreground/90">{item.label}</span>
+                  <div className={`flex items-center justify-between ${isMobile ? 'mb-3' : 'mb-1.5'}`}>
+                    <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-1'}`}>
+                      <Icon className={`${isMobile ? 'h-4 w-4' : 'h-3 w-3'} text-muted-foreground/80`} />
+                      <span className={`${isMobile ? 'text-sm' : 'text-xs'} font-medium text-foreground/90`}>{item.label}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground/70 font-mono">
+                    <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-muted-foreground/70 font-mono`}>
                       {item.value}/6
                     </span>
                   </div>
 
                   {/* 评分按钮 - 精致的线条 */}
-                  <div className="grid grid-cols-6 gap-1 mb-2">
+                  <div className={`grid grid-cols-6 ${isMobile ? 'gap-2 mb-4' : 'gap-1 mb-2'}`}>
                     {[1, 2, 3, 4, 5, 6].map((level) => (
                       <button
                         key={level}
                         onClick={() => handleQuickRate(item.key as keyof DailyStatus, level)}
-                        className={`h-1.5 rounded-full transition-all duration-200 ${
+                        className={`${isMobile ? 'h-3' : 'h-1.5'} rounded-full transition-all duration-200 ${
                           item.value >= level
                             ? getColorClass(item.key, item.value)
                             : 'bg-muted/60 hover:bg-muted-foreground/30'
-                        }`}
+                        } ${isMobile ? 'active:scale-95' : ''}`}
                       />
                     ))}
                   </div>
 
                   {/* 备注预览 */}
                   {item.notes && !isEditing && (
-                    <div className="text-xs text-muted-foreground/80 mb-1 line-clamp-1 px-1">
+                    <div className={`${isMobile ? 'text-sm mb-2 px-2' : 'text-xs mb-1 px-1'} text-muted-foreground/80 line-clamp-1`}>
                       {item.notes}
                     </div>
                   )}
@@ -168,24 +170,24 @@ export function DailyStatusCard({ date, initialStatus, onSave }: DailyStatusCard
                       variant="ghost"
                       size="sm"
                       onClick={() => setEditingField(item.key)}
-                      className="h-4 w-4 p-0 text-muted-foreground/40 hover:text-muted-foreground/70 hover:bg-muted/30 rounded-full transition-all"
+                      className={`${isMobile ? 'h-8 w-8' : 'h-4 w-4'} p-0 text-muted-foreground/40 hover:text-muted-foreground/70 hover:bg-muted/30 rounded-full transition-all ${isMobile ? 'active:scale-95' : ''}`}
                     >
-                      {item.notes ? <Edit3 className="h-2 w-2" /> : <Plus className="h-2 w-2" />}
+                      {item.notes ? <Edit3 className={`${isMobile ? 'h-4 w-4' : 'h-2 w-2'}`} /> : <Plus className={`${isMobile ? 'h-4 w-4' : 'h-2 w-2'}`} />}
                     </Button>
                   </div>
                 </div>
 
                 {/* 备注编辑浮层 - 更大的编辑空间 */}
                 {isEditing && (
-                  <div className="absolute inset-0 p-3 bg-background border rounded-md shadow-xl z-20 min-h-[200px]">
-                    <div className="space-y-3 h-full flex flex-col">
+                  <div className={`absolute ${isMobile ? 'inset-x-0 top-0 left-0 right-0' : 'inset-0'} ${isMobile ? 'p-4' : 'p-3'} bg-background border rounded-md shadow-xl z-20 ${isMobile ? 'min-h-[250px]' : 'min-h-[200px]'}`}>
+                    <div className={`space-y-${isMobile ? '4' : '3'} h-full flex flex-col`}>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{item.label}</span>
+                        <span className={`${isMobile ? 'text-base' : 'text-sm'} font-medium`}>{item.label}</span>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => setEditingField(null)}
-                          className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                          className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} p-0 text-muted-foreground hover:text-foreground`}
                         >
                           ×
                         </Button>
@@ -194,22 +196,22 @@ export function DailyStatusCard({ date, initialStatus, onSave }: DailyStatusCard
                         placeholder={t(`dailyStatus.placeholders.${item.key === 'sleepQuality' ? 'sleep' : item.key}`)}
                         value={item.notes}
                         onChange={(e) => handleInputChange(`${item.key}Notes` as keyof DailyStatus, e.target.value)}
-                        className="flex-1 min-h-[80px] text-sm resize-none"
+                        className={`flex-1 ${isMobile ? 'min-h-[120px] text-base' : 'min-h-[80px] text-sm'} resize-none`}
                         autoFocus
                       />
-                      <div className="flex gap-2">
+                      <div className={`flex ${isMobile ? 'gap-3' : 'gap-2'}`}>
                         <Button
-                          size="sm"
+                          size={isMobile ? "default" : "sm"}
                           onClick={() => handleSaveField(item.key)}
-                          className="flex-1 h-8 text-sm"
+                          className={`flex-1 ${isMobile ? 'h-10 text-base' : 'h-8 text-sm'}`}
                         >
                           保存
                         </Button>
                         <Button
                           variant="outline"
-                          size="sm"
+                          size={isMobile ? "default" : "sm"}
                           onClick={() => setEditingField(null)}
-                          className="flex-1 h-8 text-sm"
+                          className={`flex-1 ${isMobile ? 'h-10 text-base' : 'h-8 text-sm'}`}
                         >
                           取消
                         </Button>
@@ -223,7 +225,7 @@ export function DailyStatusCard({ date, initialStatus, onSave }: DailyStatusCard
         </div>
 
         {/* 第二行：睡眠质量、睡眠时间 */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-2 gap-2'}`}>
           {/* 睡眠质量 */}
           {(() => {
             const item = statusItems[3] // sleepQuality
@@ -232,36 +234,36 @@ export function DailyStatusCard({ date, initialStatus, onSave }: DailyStatusCard
 
             return (
               <div key={item.key} className="relative">
-                <div className="p-1.5 rounded-md border bg-card hover:bg-accent/20 transition-colors group">
+                <div className={`${isMobile ? 'p-3' : 'p-1.5'} rounded-md border bg-card hover:bg-accent/20 transition-colors group`}>
                   {/* 标题和评分 */}
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-1">
-                      <Icon className="h-3 w-3 text-muted-foreground/80" />
-                      <span className="text-xs font-medium text-foreground/90">{item.label}</span>
+                  <div className={`flex items-center justify-between ${isMobile ? 'mb-3' : 'mb-1.5'}`}>
+                    <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-1'}`}>
+                      <Icon className={`${isMobile ? 'h-4 w-4' : 'h-3 w-3'} text-muted-foreground/80`} />
+                      <span className={`${isMobile ? 'text-sm' : 'text-xs'} font-medium text-foreground/90`}>{item.label}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground/70 font-mono">
+                    <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-muted-foreground/70 font-mono`}>
                       {item.value}/6
                     </span>
                   </div>
 
                   {/* 评分按钮 - 精致的线条 */}
-                  <div className="grid grid-cols-6 gap-1 mb-2">
+                  <div className={`grid grid-cols-6 ${isMobile ? 'gap-2 mb-4' : 'gap-1 mb-2'}`}>
                     {[1, 2, 3, 4, 5, 6].map((level) => (
                       <button
                         key={level}
                         onClick={() => handleQuickRate(item.key as keyof DailyStatus, level)}
-                        className={`h-1.5 rounded-full transition-all duration-200 ${
+                        className={`${isMobile ? 'h-3' : 'h-1.5'} rounded-full transition-all duration-200 ${
                           item.value >= level
                             ? getColorClass(item.key, item.value)
                             : 'bg-muted/60 hover:bg-muted-foreground/30'
-                        }`}
+                        } ${isMobile ? 'active:scale-95' : ''}`}
                       />
                     ))}
                   </div>
 
                   {/* 备注预览 */}
                   {item.notes && !isEditing && (
-                    <div className="text-xs text-muted-foreground/80 mb-1 line-clamp-1 px-1">
+                    <div className={`${isMobile ? 'text-sm mb-2 px-2' : 'text-xs mb-1 px-1'} text-muted-foreground/80 line-clamp-1`}>
                       {item.notes}
                     </div>
                   )}
@@ -272,23 +274,23 @@ export function DailyStatusCard({ date, initialStatus, onSave }: DailyStatusCard
                       variant="ghost"
                       size="sm"
                       onClick={() => setEditingField(item.key)}
-                      className="h-4 w-4 p-0 text-muted-foreground/40 hover:text-muted-foreground/70 hover:bg-muted/30 rounded-full transition-all"
+                      className={`${isMobile ? 'h-8 w-8' : 'h-4 w-4'} p-0 text-muted-foreground/40 hover:text-muted-foreground/70 hover:bg-muted/30 rounded-full transition-all ${isMobile ? 'active:scale-95' : ''}`}
                     >
-                      {item.notes ? <Edit3 className="h-2 w-2" /> : <Plus className="h-2 w-2" />}
+                      {item.notes ? <Edit3 className={`${isMobile ? 'h-4 w-4' : 'h-2 w-2'}`} /> : <Plus className={`${isMobile ? 'h-4 w-4' : 'h-2 w-2'}`} />}
                     </Button>
                   </div>
                 </div>
 
                 {isEditing && (
-                  <div className="absolute inset-0 p-3 bg-background border rounded-md shadow-xl z-20 min-h-[200px]">
-                    <div className="space-y-3 h-full flex flex-col">
+                  <div className={`absolute ${isMobile ? 'inset-x-0 top-0 left-0 right-0' : 'inset-0'} ${isMobile ? 'p-4' : 'p-3'} bg-background border rounded-md shadow-xl z-20 ${isMobile ? 'min-h-[250px]' : 'min-h-[200px]'}`}>
+                    <div className={`space-y-${isMobile ? '4' : '3'} h-full flex flex-col`}>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{item.label}</span>
+                        <span className={`${isMobile ? 'text-base' : 'text-sm'} font-medium`}>{item.label}</span>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => setEditingField(null)}
-                          className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                          className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} p-0 text-muted-foreground hover:text-foreground`}
                         >
                           ×
                         </Button>
@@ -297,22 +299,22 @@ export function DailyStatusCard({ date, initialStatus, onSave }: DailyStatusCard
                         placeholder={t('dailyStatus.placeholders.sleep')}
                         value={item.notes}
                         onChange={(e) => handleInputChange('sleepNotes', e.target.value)}
-                        className="flex-1 min-h-[80px] text-sm resize-none"
+                        className={`flex-1 ${isMobile ? 'min-h-[120px] text-base' : 'min-h-[80px] text-sm'} resize-none`}
                         autoFocus
                       />
-                      <div className="flex gap-2">
+                      <div className={`flex ${isMobile ? 'gap-3' : 'gap-2'}`}>
                         <Button
-                          size="sm"
+                          size={isMobile ? "default" : "sm"}
                           onClick={() => handleSaveField(item.key)}
-                          className="flex-1 h-8 text-sm"
+                          className={`flex-1 ${isMobile ? 'h-10 text-base' : 'h-8 text-sm'}`}
                         >
                           保存
                         </Button>
                         <Button
                           variant="outline"
-                          size="sm"
+                          size={isMobile ? "default" : "sm"}
                           onClick={() => setEditingField(null)}
-                          className="flex-1 h-8 text-sm"
+                          className={`flex-1 ${isMobile ? 'h-10 text-base' : 'h-8 text-sm'}`}
                         >
                           取消
                         </Button>
@@ -325,15 +327,15 @@ export function DailyStatusCard({ date, initialStatus, onSave }: DailyStatusCard
           })()}
 
           {/* 睡眠时间 */}
-          <div className="p-1.5 rounded-md border bg-card hover:bg-accent/20 transition-colors">
+          <div className={`${isMobile ? 'p-3' : 'p-1.5'} rounded-md border bg-card hover:bg-accent/20 transition-colors`}>
             {/* 标题 */}
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-1">
-                <Moon className="h-3 w-3 text-muted-foreground/80" />
-                <span className="text-xs font-medium text-foreground/90">{t('dailyStatus.sleepTime')}</span>
+            <div className={`flex items-center justify-between ${isMobile ? 'mb-3' : 'mb-1.5'}`}>
+              <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-1'}`}>
+                <Moon className={`${isMobile ? 'h-4 w-4' : 'h-3 w-3'} text-muted-foreground/80`} />
+                <span className={`${isMobile ? 'text-sm' : 'text-xs'} font-medium text-foreground/90`}>{t('dailyStatus.sleepTime')}</span>
               </div>
               {(status.bedTime && status.wakeTime) && (
-                <span className="text-xs text-muted-foreground/70 font-mono">
+                <span className={`${isMobile ? 'text-sm' : 'text-xs'} text-muted-foreground/70 font-mono`}>
                   {(() => {
                     const bedTime = new Date(`2000-01-01 ${status.bedTime}`)
                     const wakeTime = new Date(`2000-01-0${status.bedTime > status.wakeTime ? '2' : '1'} ${status.wakeTime}`)
@@ -344,10 +346,10 @@ export function DailyStatusCard({ date, initialStatus, onSave }: DailyStatusCard
               )}
             </div>
 
-            {/* 时间输入 - 一行显示 */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="flex items-center gap-1.5">
-                <Label className="text-xs text-muted-foreground/80 whitespace-nowrap">{t('dailyStatus.bedTime')}</Label>
+            {/* 时间输入 - 移动端垂直布局 */}
+            <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-2 gap-2'}`}>
+              <div className={`flex items-center ${isMobile ? 'gap-3' : 'gap-1.5'}`}>
+                <Label className={`${isMobile ? 'text-sm w-16' : 'text-xs'} text-muted-foreground/80 whitespace-nowrap`}>{t('dailyStatus.bedTime')}</Label>
                 <Input
                   type="time"
                   value={status.bedTime}
@@ -355,11 +357,11 @@ export function DailyStatusCard({ date, initialStatus, onSave }: DailyStatusCard
                     handleInputChange('bedTime', e.target.value)
                     onSave({ ...status, bedTime: e.target.value })
                   }}
-                  className="h-6 text-xs border-muted/50 focus:border-primary/50 flex-1"
+                  className={`${isMobile ? 'h-10 text-base' : 'h-6 text-xs'} border-muted/50 focus:border-primary/50 flex-1`}
                 />
               </div>
-              <div className="flex items-center gap-1.5">
-                <Label className="text-xs text-muted-foreground/80 whitespace-nowrap">{t('dailyStatus.wakeTime')}</Label>
+              <div className={`flex items-center ${isMobile ? 'gap-3' : 'gap-1.5'}`}>
+                <Label className={`${isMobile ? 'text-sm w-16' : 'text-xs'} text-muted-foreground/80 whitespace-nowrap`}>{t('dailyStatus.wakeTime')}</Label>
                 <Input
                   type="time"
                   value={status.wakeTime}
@@ -367,7 +369,7 @@ export function DailyStatusCard({ date, initialStatus, onSave }: DailyStatusCard
                     handleInputChange('wakeTime', e.target.value)
                     onSave({ ...status, wakeTime: e.target.value })
                   }}
-                  className="h-6 text-xs border-muted/50 focus:border-primary/50 flex-1"
+                  className={`${isMobile ? 'h-10 text-base' : 'h-6 text-xs'} border-muted/50 focus:border-primary/50 flex-1`}
                 />
               </div>
             </div>

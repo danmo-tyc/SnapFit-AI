@@ -27,6 +27,7 @@ import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useIndexedDB } from "@/hooks/use-indexed-db"
 import { useExportReminder } from "@/hooks/use-export-reminder"
 import { useDateRecords } from "@/hooks/use-date-records"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { compressImage } from "@/lib/image-utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -106,6 +107,9 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
 
   // 使用日期记录检查Hook
   const { hasRecord, refreshRecords } = useDateRecords()
+
+  // 使用移动端检测Hook
+  const isMobile = useIsMobile()
 
   const [dailyLog, setDailyLog] = useState<DailyLog>(() => ({
     date: format(selectedDate, "yyyy-MM-dd"),
@@ -1053,7 +1057,7 @@ export default function Dashboard({ params }: { params: Promise<{ locale: string
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">今日记录</span>
+                {!isMobile && <span className="text-sm text-muted-foreground">今日记录</span>}
                 <span className="text-sm font-mono bg-muted px-2 py-1 rounded">
                   {(() => {
                     let count = 0
