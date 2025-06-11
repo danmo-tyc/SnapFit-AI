@@ -5,6 +5,9 @@
 [![GitHub forks](https://img.shields.io/github/forks/Feather-2/SnapFit-AI?style=social)](https://github.com/Feather-2/SnapFit-AI/network/members)
 
 ---
+社区版：
+https://github.com/Mount-Huaguo-Holy-Tech/SnapFit-AI-Community-Edition
+---
 ![1749089248648](https://github.com/user-attachments/assets/fe137e38-7187-4850-b88a-abb1dff22fa8)
 
 ## 引言
