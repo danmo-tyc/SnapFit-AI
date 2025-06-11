@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapFit AI - 简易APK构建器</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #10b981;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .method {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .method h3 {
+            color: #1f2937;
+            margin-top: 0;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+            font-weight: 600;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .status {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .success {
+            background: #d1fae5;
+            border-color: #10b981;
+            color: #065f46;
+        }
+        
+        .info {
+            background: #dbeafe;
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+        
+        .code {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 SnapFit AI - APK构建器</h1>
+        
+        <div class="status">
+            <strong>📍 当前状态：</strong> APK文件尚未生成，需要Java SDK环境
+        </div>
+        
+        <div class="method">
+            <h3>🚀 方法1：快速在线构建（推荐）</h3>
+            <p>使用在线服务快速生成APK，无需安装开发环境：</p>
+            <a href="https://www.websitetoapk.com/" target="_blank" class="btn">Website to APK</a>
+            <a href="https://appsgeyser.com/" target="_blank" class="btn">AppsGeyser</a>
+            <a href="https://gonative.io/" target="_blank" class="btn">GoNative</a>
+            
+            <div class="info" style="margin-top: 15px;">
+                <strong>使用步骤：</strong><br>
+                1. 访问任一在线服务<br>
+                2. 输入您的应用URL: <code>http://localhost:3000</code><br>
+                3. 设置应用名称: SnapFit AI<br>
+                4. 上传应用图标<br>
+                5. 下载生成的APK文件
+            </div>
+        </div>
+        
+        <div class="method">
+            <h3>🔧 方法2：安装Android Studio完整构建</h3>
+            <p>获得最佳的APK质量和完整功能：</p>
+            <a href="https://developer.android.com/studio" target="_blank" class="btn">下载Android Studio</a>
+            <button class="btn" onclick="showBuildSteps()">查看构建步骤</button>
+            
+            <div id="buildSteps" style="display: none; margin-top: 15px;">
+                <div class="code">
+# 1. 安装Android Studio后，设置环境变量
+JAVA_HOME=C:\Program Files\Android\Android Studio\jbr
+ANDROID_HOME=C:\Users\[用户名]\AppData\Local\Android\Sdk
+
+# 2. 运行构建脚本
+powershell -ExecutionPolicy Bypass -File build-apk.ps1
+
+# 3. APK文件位置
+android\app\build\outputs\apk\debug\app-debug.apk
+                </div>
+            </div>
+        </div>
+        
+        <div class="method">
+            <h3>📲 方法3：PWA安装（即时可用）</h3>
+            <p>将Web应用添加到手机主屏幕，获得类似原生应用的体验：</p>
+            <button class="btn" onclick="showPWASteps()">查看PWA安装步骤</button>
+            
+            <div id="pwaSteps" style="display: none; margin-top: 15px;">
+                <div class="info">
+                    <strong>Android设备上：</strong><br>
+                    1. 打开Chrome浏览器<br>
+                    2. 访问: <code>http://localhost:3000</code><br>
+                    3. 点击菜单 → "添加到主屏幕"<br>
+                    4. 确认添加<br>
+                    5. 在主屏幕上找到SnapFit AI图标<br><br>
+                    
+                    <strong>iPhone设备上：</strong><br>
+                    1. 打开Safari浏览器<br>
+                    2. 访问应用网址<br>
+                    3. 点击分享按钮<br>
+                    4. 选择"添加到主屏幕"<br>
+                    5. 确认添加
+                </div>
+            </div>
+        </div>
+        
+        <div class="method">
+            <h3>☁️ 方法4：GitHub Actions自动构建</h3>
+            <p>设置自动化构建，每次代码更新自动生成APK：</p>
+            <button class="btn" onclick="createGitHubAction()">创建GitHub Action</button>
+            <button class="btn" onclick="showGitHubSteps()">查看设置步骤</button>
+            
+            <div id="githubSteps" style="display: none; margin-top: 15px;">
+                <div class="info">
+                    <strong>设置步骤：</strong><br>
+                    1. 将代码推送到GitHub仓库<br>
+                    2. 创建GitHub Actions工作流<br>
+                    3. 配置Android构建环境<br>
+                    4. 自动构建并发布APK<br>
+                    5. 从Releases页面下载APK
+                </div>
+            </div>
+        </div>
+        
+        <div class="status success">
+            <strong>💡 推荐方案：</strong><br>
+            • <strong>立即使用</strong>：方法3 (PWA安装)<br>
+            • <strong>快速APK</strong>：方法1 (在线构建)<br>
+            • <strong>最佳质量</strong>：方法2 (Android Studio)
+        </div>
+        
+        <div class="method">
+            <h3>📋 当前项目状态</h3>
+            <div class="success">
+                ✅ Capacitor配置完成<br>
+                ✅ Android项目已生成<br>
+                ✅ 移动端界面已优化<br>
+                ✅ 构建脚本已准备<br>
+                ❌ 需要Java SDK环境
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showBuildSteps() {
+            const steps = document.getElementById('buildSteps');
+            steps.style.display = steps.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function showPWASteps() {
+            const steps = document.getElementById('pwaSteps');
+            steps.style.display = steps.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function showGitHubSteps() {
+            const steps = document.getElementById('githubSteps');
+            steps.style.display = steps.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function createGitHubAction() {
+            const workflow = `name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Build web app
+      run: npm run build-mobile
+      
+    - name: Build APK
+      run: |
+        npx cap sync
+        cd android
+        ./gradlew assembleDebug
+        
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-debug
+        path: android/app/build/outputs/apk/debug/app-debug.apk`;
+        
+        const blob = new Blob([workflow], { type: 'text/yaml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'android-build.yml';
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        alert('GitHub Actions工作流文件已下载！\n请将此文件放置在：.github/workflows/android-build.yml');
+        }
+    </script>
+</body>
+</html>

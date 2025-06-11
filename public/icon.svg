@@ -1,0 +1,41 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆形 -->
+  <circle cx="256" cy="256" r="240" fill="url(#gradient)" stroke="#10b981" stroke-width="8"/>
+  
+  <!-- 渐变定义 -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 健康图标 - 心形 -->
+  <path d="M256 400c-40-32-120-80-120-160 0-44.18 35.82-80 80-80 24.84 0 46.84 11.52 60 29.6C289.16 171.52 311.16 160 336 160c44.18 0 80 35.82 80 80 0 80-80 128-120 160z" fill="white" opacity="0.9"/>
+  
+  <!-- AI 芯片图标 -->
+  <rect x="200" y="120" width="112" height="80" rx="8" fill="white" opacity="0.8"/>
+  <rect x="208" y="128" width="96" height="64" rx="4" fill="#10b981"/>
+  
+  <!-- 芯片内部电路 -->
+  <line x1="220" y1="140" x2="292" y2="140" stroke="white" stroke-width="2"/>
+  <line x1="220" y1="150" x2="280" y2="150" stroke="white" stroke-width="2"/>
+  <line x1="220" y1="160" x2="292" y2="160" stroke="white" stroke-width="2"/>
+  <line x1="220" y1="170" x2="270" y2="170" stroke="white" stroke-width="2"/>
+  <line x1="220" y1="180" x2="292" y2="180" stroke="white" stroke-width="2"/>
+  
+  <!-- 连接线 -->
+  <line x1="200" y1="135" x2="180" y2="135" stroke="white" stroke-width="3"/>
+  <line x1="200" y1="150" x2="180" y2="150" stroke="white" stroke-width="3"/>
+  <line x1="200" y1="165" x2="180" y2="165" stroke="white" stroke-width="3"/>
+  <line x1="200" y1="180" x2="180" y2="180" stroke="white" stroke-width="3"/>
+  
+  <line x1="312" y1="135" x2="332" y2="135" stroke="white" stroke-width="3"/>
+  <line x1="312" y1="150" x2="332" y2="150" stroke="white" stroke-width="3"/>
+  <line x1="312" y1="165" x2="332" y2="165" stroke="white" stroke-width="3"/>
+  <line x1="312" y1="180" x2="332" y2="180" stroke="white" stroke-width="3"/>
+  
+  <!-- 文字 -->
+  <text x="256" y="320" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="36" font-weight="bold">SnapFit</text>
+  <text x="256" y="360" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24" opacity="0.9">AI</text>
+</svg>

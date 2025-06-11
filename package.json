@@ -1,15 +1,40 @@
 {
-  "name": "SnapFit AI project",
-  "version": "0.1.0",
+  "name": "snapfit-ai",
+  "productName": "SnapFit AI",
+  "version": "1.0.0",
+  "description": "智能健康管理应用 - 基于AI技术的个人健康助手",
+  "main": "electron/main.js",
+  "homepage": "./",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "electron": "electron .",
+    "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "pack-app": "electron-builder --dir",
+    "dist": "electron-builder --publish=never",
+    "dist-win": "electron-builder --win --publish=never",
+    "dist-mac": "electron-builder --mac --publish=never",
+    "dist-linux": "electron-builder --linux --publish=never",
+    "build-mobile": "cross-env NEXT_CONFIG_FILE=next.config.mobile.mjs next build",
+    "cap-add-android": "npx cap add android",
+    "cap-sync": "npx cap sync",
+    "cap-open-android": "npx cap open android",
+    "build-android": "npm run build-mobile && npx cap sync && npx cap open android",
+    "build-apk": "npm run build-mobile && npx cap sync && cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
     "@ai-sdk/openai": "latest",
+    "@capacitor/android": "^7.3.0",
+    "@capacitor/app": "^7.0.1",
+    "@capacitor/cli": "^7.3.0",
+    "@capacitor/core": "^7.3.0",
+    "@capacitor/haptics": "^7.0.1",
+    "@capacitor/keyboard": "^7.0.1",
+    "@capacitor/splash-screen": "^7.0.1",
+    "@capacitor/status-bar": "^7.0.1",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
@@ -73,8 +98,69 @@
     "@types/node": "^22.15.29",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "electron": "^36.4.0",
+    "electron-builder": "^26.0.12",
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "wait-on": "^8.0.3"
+  },
+  "build": {
+    "appId": "com.snapfit.ai",
+    "productName": "SnapFit AI",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!node_modules",
+      "!dist",
+      "!.git",
+      "!.next/cache",
+      "!*.log"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "dir",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "public/icon.icns",
+      "category": "public.app-category.healthcare-fitness"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "public/icon.png",
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }
