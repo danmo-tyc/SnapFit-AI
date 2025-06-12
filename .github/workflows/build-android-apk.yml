@@ -122,14 +122,10 @@ jobs:
       run: |
         cd android
         echo "🔧 Configuring Gradle properties..."
-        echo "org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError" >> gradle.properties
-        echo "org.gradle.parallel=true" >> gradle.properties
-        echo "org.gradle.caching=true" >> gradle.properties
-        echo "org.gradle.configureondemand=true" >> gradle.properties
+        echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> gradle.properties
         echo "org.gradle.daemon=false" >> gradle.properties
         echo "android.useAndroidX=true" >> gradle.properties
         echo "android.enableJetifier=true" >> gradle.properties
-        echo "android.enableR8.fullMode=false" >> gradle.properties
         echo "📋 Current gradle.properties:"
         cat gradle.properties
 
@@ -137,13 +133,11 @@ jobs:
       run: |
         cd android
         echo "🧹 Cleaning previous builds..."
-        ./gradlew clean --no-daemon
+        ./gradlew clean --no-daemon --stacktrace
         echo "📋 Gradle version info:"
         ./gradlew --version
-        echo "🔧 Available tasks:"
-        ./gradlew tasks --all | head -20
         echo "🚀 Building APK..."
-        ./gradlew assembleDebug --no-daemon --stacktrace --info --debug
+        ./gradlew assembleDebug --no-daemon --stacktrace
         
     - name: 📋 List APK Files
       run: |
