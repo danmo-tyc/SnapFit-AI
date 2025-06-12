@@ -106,21 +106,44 @@ jobs:
     - name: 🛠️ Grant Execute Permission
       run: |
         chmod +x android/gradlew
+
+    - name: 🔍 Check Android Project Structure
+      run: |
+        echo "📁 Android project structure:"
+        ls -la android/
+        echo "📱 App directory:"
+        ls -la android/app/
+        echo "📋 Gradle wrapper:"
+        ls -la android/gradle/
+        echo "🔧 Build files:"
+        find android -name "*.gradle" -o -name "*.gradle.kts" | head -10
         
     - name: 🔧 Configure Gradle
       run: |
         cd android
-        echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> gradle.properties
+        echo "🔧 Configuring Gradle properties..."
+        echo "org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError" >> gradle.properties
         echo "org.gradle.parallel=true" >> gradle.properties
         echo "org.gradle.caching=true" >> gradle.properties
+        echo "org.gradle.configureondemand=true" >> gradle.properties
+        echo "org.gradle.daemon=false" >> gradle.properties
         echo "android.useAndroidX=true" >> gradle.properties
         echo "android.enableJetifier=true" >> gradle.properties
+        echo "android.enableR8.fullMode=false" >> gradle.properties
+        echo "📋 Current gradle.properties:"
+        cat gradle.properties
 
     - name: 📱 Build Debug APK
       run: |
         cd android
-        ./gradlew clean
-        ./gradlew assembleDebug --no-daemon --stacktrace --info
+        echo "🧹 Cleaning previous builds..."
+        ./gradlew clean --no-daemon
+        echo "📋 Gradle version info:"
+        ./gradlew --version
+        echo "🔧 Available tasks:"
+        ./gradlew tasks --all | head -20
+        echo "🚀 Building APK..."
+        ./gradlew assembleDebug --no-daemon --stacktrace --info --debug
         
     - name: 📋 List APK Files
       run: |
