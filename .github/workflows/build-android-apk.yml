@@ -92,7 +92,12 @@ jobs:
 
     - name: 📱 Add Android Platform
       run: |
-        npx cap add android
+        # Skip if android directory already exists
+        if [ ! -d "android" ]; then
+          npx cap add android
+        else
+          echo "Android platform already exists, skipping add step"
+        fi
 
     - name: 🔄 Sync Capacitor
       run: |
