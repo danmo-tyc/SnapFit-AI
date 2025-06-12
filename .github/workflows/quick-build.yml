@@ -1,0 +1,60 @@
+name: ⚡ Quick Build APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_name:
+        description: 'Release name (optional)'
+        required: false
+        default: 'SnapFit AI'
+
+jobs:
+  quick-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: ☕ Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: 📱 Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: 🔧 Install & Build
+      run: |
+        npm ci
+        npm run build
+
+    - name: 📁 Create index.html
+      run: |
+        echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=./zh/"><title>SnapFit AI</title></head><body><script>window.location.href="./zh/";</script></body></html>' > out/index.html
+
+    - name: 🔄 Sync & Build APK
+      run: |
+        npx cap sync android
+        cd android
+        chmod +x gradlew
+        ./gradlew assembleDebug
+
+    - name: 📤 Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: SnapFit-AI-Quick-Build
+        path: android/app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 7
+
+    - name: 🎉 Success
+      run: |
+        echo "✅ APK 构建成功！"
+        echo "📥 请在 Actions 页面的 Artifacts 部分下载"

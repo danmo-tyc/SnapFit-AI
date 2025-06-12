@@ -133,44 +133,154 @@ export function useFormHandlers({
       const effectiveWeight = dailyLog.weight || userProfile.weight
 
       if (uploadedImages.length > 0) {
-        const formData = new FormData()
-        formData.append("text", inputText)
-        formData.append("type", activeTab)
-        formData.append("userWeight", effectiveWeight.toString())
-        formData.append("aiConfig", JSON.stringify(aiConfig))
-        uploadedImages.forEach((img, index) => {
-          formData.append(`image${index}`, img.compressedFile || img.file)
+        // 处理图片+文本解析
+        const { OpenAICompatibleClient } = await import("@/lib/openai-client")
+        const modelConfig = aiConfig.visionModel
+        const client = new OpenAICompatibleClient(modelConfig.baseUrl, modelConfig.apiKey)
+
+        // 将图片转换为base64
+        const imageDataURIs = await Promise.all(
+          uploadedImages.map(async (img) => {
+            const file = img.compressedFile || img.file
+            return new Promise<string>((resolve) => {
+              const reader = new FileReader()
+              reader.onload = () => resolve(reader.result as string)
+              reader.readAsDataURL(file)
+            })
+          })
+        )
+
+        const prompt = activeTab === "food"
+          ? `请分析这些图片中的食物，并提供详细的营养信息。用户体重：${effectiveWeight}kg。
+
+            用户描述：${inputText}
+
+            请以JSON格式返回，包含以下字段：
+            {
+              "food": [
+                {
+                  "log_id": "uuid",
+                  "food_name": "食物名称",
+                  "quantity": 数量,
+                  "unit": "单位",
+                  "calories_per_unit": 每单位卡路里,
+                  "total_calories": 总卡路里,
+                  "protein": 蛋白质克数,
+                  "carbs": 碳水化合物克数,
+                  "fat": 脂肪克数,
+                  "fiber": 纤维克数,
+                  "sugar": 糖分克数,
+                  "sodium": 钠毫克数,
+                  "is_estimated": true
+                }
+              ]
+            }`
+          : `请分析这些图片中的运动活动，并提供详细信息。用户体重：${effectiveWeight}kg。
+
+            用户描述：${inputText}
+
+            请以JSON格式返回，包含以下字段：
+            {
+              "exercise": [
+                {
+                  "log_id": "uuid",
+                  "exercise_name": "运动名称",
+                  "exercise_type": "运动类型",
+                  "duration_minutes": 持续时间分钟,
+                  "distance_km": 距离公里,
+                  "estimated_mets": 估计MET值,
+                  "user_weight": ${effectiveWeight},
+                  "calories_burned_estimated": 估计消耗卡路里,
+                  "muscle_groups": ["肌肉群"],
+                  "is_estimated": true
+                }
+              ]
+            }`
+
+        const response = await client.generateText({
+          model: modelConfig.name,
+          prompt,
+          images: imageDataURIs,
+          response_format: { type: "json_object" },
         })
 
-        const response = await fetch("/api/openai/parse-with-images", {
-          method: "POST",
-          body: formData,
-        })
+        result = JSON.parse(response.text)
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: "解析失败" }))
-          throw new Error(errorData.message || "解析失败")
+        // 为每个条目添加唯一ID
+        if (result[activeTab] && Array.isArray(result[activeTab])) {
+          const { v4: uuidv4 } = await import("uuid")
+          result[activeTab].forEach((item: any) => {
+            item.log_id = uuidv4()
+          })
         }
-        result = await response.json()
       } else {
-        const response = await fetch("/api/openai/parse", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-ai-config": JSON.stringify(aiConfig),
-          },
-          body: JSON.stringify({
-            text: inputText,
-            type: activeTab,
-            userWeight: effectiveWeight,
-          }),
+        // 处理纯文本解析
+        const { OpenAICompatibleClient } = await import("@/lib/openai-client")
+        const modelConfig = aiConfig.agentModel
+        const client = new OpenAICompatibleClient(modelConfig.baseUrl, modelConfig.apiKey)
+
+        const prompt = activeTab === "food"
+          ? `请分析以下食物描述，并提供详细的营养信息。用户体重：${effectiveWeight}kg。
+
+            食物描述：${inputText}
+
+            请以JSON格式返回，包含以下字段：
+            {
+              "food": [
+                {
+                  "log_id": "uuid",
+                  "food_name": "食物名称",
+                  "quantity": 数量,
+                  "unit": "单位",
+                  "calories_per_unit": 每单位卡路里,
+                  "total_calories": 总卡路里,
+                  "protein": 蛋白质克数,
+                  "carbs": 碳水化合物克数,
+                  "fat": 脂肪克数,
+                  "fiber": 纤维克数,
+                  "sugar": 糖分克数,
+                  "sodium": 钠毫克数,
+                  "is_estimated": true
+                }
+              ]
+            }`
+          : `请分析以下运动描述，并提供详细信息。用户体重：${effectiveWeight}kg。
+
+            运动描述：${inputText}
+
+            请以JSON格式返回，包含以下字段：
+            {
+              "exercise": [
+                {
+                  "log_id": "uuid",
+                  "exercise_name": "运动名称",
+                  "exercise_type": "运动类型",
+                  "duration_minutes": 持续时间分钟,
+                  "distance_km": 距离公里,
+                  "estimated_mets": 估计MET值,
+                  "user_weight": ${effectiveWeight},
+                  "calories_burned_estimated": 估计消耗卡路里,
+                  "muscle_groups": ["肌肉群"],
+                  "is_estimated": true
+                }
+              ]
+            }`
+
+        const response = await client.generateText({
+          model: modelConfig.name,
+          prompt,
+          response_format: { type: "json_object" },
         })
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: "解析失败" }))
-          throw new Error(errorData.message || "解析失败")
+        result = JSON.parse(response.text)
+
+        // 为每个条目添加唯一ID
+        if (result[activeTab] && Array.isArray(result[activeTab])) {
+          const { v4: uuidv4 } = await import("uuid")
+          result[activeTab].forEach((item: any) => {
+            item.log_id = uuidv4()
+          })
         }
-        result = await response.json()
       }
 
       const updatedLog = { ...dailyLog }

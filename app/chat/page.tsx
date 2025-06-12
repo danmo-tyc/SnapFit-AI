@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
-import { useChat } from "ai/react"
+import { useCustomChat } from "@/hooks/use-custom-chat"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -586,8 +586,7 @@ export default function ChatPage() {
   // 获取当前选择的专家
   const currentExpert = expertRoles.find(expert => expert.id === selectedExpert) || expertRoles[0]
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error, setMessages } = useChat({
-    api: "/api/openai/chat",
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error, setMessages } = useCustomChat({
     initialMessages: [],
     headers: {
       "x-ai-config": JSON.stringify(aiConfig),

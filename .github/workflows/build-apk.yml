@@ -1,0 +1,238 @@
+name: 🚀 Build SnapFit AI Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+        - debug
+        - release
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: ☕ Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: 📱 Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: 🔧 Install dependencies
+      run: npm ci
+
+    - name: 🔨 Build Next.js application
+      run: npm run build
+
+    - name: 📁 Create root index.html
+      run: |
+        cat > out/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html lang="zh">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>SnapFit AI - 智能健康管理</title>
+            <meta http-equiv="refresh" content="0; url=./zh/">
+            <link rel="canonical" href="./zh/">
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    color: white;
+                }
+                .loading {
+                    text-align: center;
+                }
+                .spinner {
+                    border: 3px solid rgba(255,255,255,0.3);
+                    border-radius: 50%;
+                    border-top: 3px solid white;
+                    width: 40px;
+                    height: 40px;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto 20px;
+                }
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="loading">
+                <div class="spinner"></div>
+                <h2>SnapFit AI</h2>
+                <p>正在加载智能健康管理应用...</p>
+                <p><a href="./zh/" style="color: white;">如果没有自动跳转，请点击这里</a></p>
+            </div>
+            
+            <script>
+                window.location.href = './zh/';
+            </script>
+        </body>
+        </html>
+        EOF
+
+    - name: 🔄 Sync Capacitor
+      run: npx cap sync android
+
+    - name: 🏗️ Grant execute permission for gradlew
+      run: chmod +x android/gradlew
+
+    - name: 📱 Build Debug APK
+      if: ${{ github.event.inputs.build_type == 'debug' || github.event.inputs.build_type == '' }}
+      run: |
+        cd android
+        ./gradlew assembleDebug
+
+    - name: 📱 Build Release APK
+      if: ${{ github.event.inputs.build_type == 'release' }}
+      run: |
+        cd android
+        ./gradlew assembleRelease
+
+    - name: 📊 Get APK info
+      id: apk_info
+      run: |
+        if [ "${{ github.event.inputs.build_type }}" = "release" ]; then
+          APK_PATH="android/app/build/outputs/apk/release/app-release.apk"
+          APK_NAME="SnapFit-AI-release.apk"
+        else
+          APK_PATH="android/app/build/outputs/apk/debug/app-debug.apk"
+          APK_NAME="SnapFit-AI-debug.apk"
+        fi
+        
+        if [ -f "$APK_PATH" ]; then
+          APK_SIZE=$(du -h "$APK_PATH" | cut -f1)
+          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+          echo "apk_name=$APK_NAME" >> $GITHUB_OUTPUT
+          echo "apk_size=$APK_SIZE" >> $GITHUB_OUTPUT
+          echo "✅ APK 构建成功: $APK_NAME ($APK_SIZE)"
+        else
+          echo "❌ APK 文件未找到: $APK_PATH"
+          exit 1
+        fi
+
+    - name: 📤 Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.apk_info.outputs.apk_name }}
+        path: ${{ steps.apk_info.outputs.apk_path }}
+        retention-days: 30
+
+    - name: 📋 Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ${{ steps.apk_info.outputs.apk_path }}
+        name: SnapFit AI v${{ github.ref_name }}
+        body: |
+          🎉 **SnapFit AI Android APK**
+          
+          📱 **应用信息**
+          - 版本: ${{ github.ref_name }}
+          - 构建时间: ${{ github.run_number }}
+          - APK 大小: ${{ steps.apk_info.outputs.apk_size }}
+          
+          🚀 **功能特性**
+          - ✅ 健康数据管理 (体重、饮食、运动)
+          - ✅ AI 智能分析和建议
+          - ✅ 数据可视化图表
+          - ✅ 中英文双语支持
+          - ✅ 离线数据存储
+          - ✅ 数据导入导出
+          
+          📱 **安装说明**
+          1. 下载 APK 文件
+          2. 在 Android 设备上启用"未知来源"安装
+          3. 安装并享受智能健康管理！
+          
+          🔐 **安全说明**
+          - 所有数据存储在本地设备
+          - AI API 密钥由用户自行配置
+          - 无数据上传到第三方服务器
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 💬 Comment PR with APK info
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const apkName = '${{ steps.apk_info.outputs.apk_name }}';
+          const apkSize = '${{ steps.apk_info.outputs.apk_size }}';
+          const runId = context.runId;
+          
+          const comment = `🎉 **APK 构建成功！**
+          
+          📱 **APK 信息**
+          - 文件名: \`${apkName}\`
+          - 大小: ${apkSize}
+          - 构建 ID: ${runId}
+          
+          📥 **下载方式**
+          1. 点击上方的 "Actions" 标签
+          2. 选择这次构建
+          3. 在 "Artifacts" 部分下载 APK
+          
+          🔧 **测试建议**
+          - 在真实 Android 设备上测试
+          - 验证所有功能正常工作
+          - 检查 AI 功能配置
+          `;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+    - name: 🎉 Build Summary
+      run: |
+        echo "## 🎉 SnapFit AI APK 构建完成" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📱 APK 信息" >> $GITHUB_STEP_SUMMARY
+        echo "- **文件名**: ${{ steps.apk_info.outputs.apk_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **大小**: ${{ steps.apk_info.outputs.apk_size }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **类型**: ${{ github.event.inputs.build_type || 'debug' }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📥 下载方式" >> $GITHUB_STEP_SUMMARY
+        echo "1. 在 Actions 页面的 Artifacts 部分下载" >> $GITHUB_STEP_SUMMARY
+        echo "2. 或等待 Release 自动发布 (如果是 tag 推送)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🚀 功能特性" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ 健康数据管理" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ AI 智能分析" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ 数据可视化" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ 双语支持" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ 离线存储" >> $GITHUB_STEP_SUMMARY

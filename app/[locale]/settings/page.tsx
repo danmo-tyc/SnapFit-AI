@@ -343,22 +343,11 @@ function SettingsContent() {
       }
 
       try {
-        const response = await fetch("/api/models", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            baseUrl: modelConfig.baseUrl,
-            apiKey: modelConfig.apiKey,
-          }),
-        })
+        // 直接使用客户端调用
+        const { OpenAICompatibleClient } = await import("@/lib/openai-client")
+        const client = new OpenAICompatibleClient(modelConfig.baseUrl, modelConfig.apiKey)
 
-        if (!response.ok) {
-          throw new Error(t('ai.fetchModelsFailed'))
-        }
-
-        const data = await response.json()
+        const data = await client.listModels()
 
         if (data.error) {
           throw new Error(data.error)
@@ -451,26 +440,22 @@ function SettingsContent() {
       }
 
       try {
-        const response = await fetch("/api/test-model", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            modelConfig: model,
-            modelType,
-          }),
+        // 直接使用客户端测试连接
+        const { OpenAICompatibleClient } = await import("@/lib/openai-client")
+        const client = new OpenAICompatibleClient(model.baseUrl, model.apiKey)
+
+        // 发送一个简单的测试请求
+        await client.generateText({
+          model: model.name,
+          prompt: "Hello, this is a test message. Please respond with 'OK'.",
         })
 
-        if (response.ok) {
-          toast({
-            title: t('ai.testSuccess'),
-            description: t('ai.modelConnectionOk', { modelType }),
-          })
-        } else {
-          throw new Error("测试失败")
-        }
+        toast({
+          title: t('ai.testSuccess'),
+          description: t('ai.modelConnectionOk', { modelType }),
+        })
       } catch (error) {
+        console.error("Model test error:", error)
         toast({
           title: t('ai.testFailed'),
           description: t('ai.modelConnectionFailed', { modelType }),

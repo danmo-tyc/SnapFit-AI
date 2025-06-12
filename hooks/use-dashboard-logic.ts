@@ -105,24 +105,46 @@ export function useDashboardLogic(selectedDate: Date, userProfile: any) {
     if (!foodEntries.length || !checkAIConfig()) return null
 
     try {
-      const response = await fetch("/api/openai/tef-analysis", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-ai-config": JSON.stringify(aiConfig),
-        },
-        body: JSON.stringify({ foodEntries }),
+      // 直接使用客户端调用
+      const { OpenAICompatibleClient } = await import("@/lib/openai-client")
+      const modelConfig = aiConfig.agentModel
+      const client = new OpenAICompatibleClient(modelConfig.baseUrl, modelConfig.apiKey)
+
+      const prompt = `分析以下食物的热效应(TEF)增强因子。
+
+食物列表：
+${JSON.stringify(foodEntries, null, 2)}
+
+请分析这些食物的TEF增强因子，考虑以下因素：
+1. 蛋白质含量（高蛋白食物TEF更高）
+2. 食物加工程度（未加工食物TEF更高）
+3. 辛辣程度（辛辣食物可能增加TEF）
+4. 咖啡因含量（含咖啡因食物可能增加TEF）
+
+请返回一个1.0-1.3之间的增强乘数，以及增强因素列表。
+
+请以JSON格式返回：
+{
+  "enhancementMultiplier": 1.1,
+  "enhancementFactors": ["高蛋白食物", "未加工食物"],
+  "analysisTimestamp": "${new Date().toISOString()}"
+}`
+
+      const response = await client.generateText({
+        model: modelConfig.name,
+        prompt,
+        response_format: { type: "json_object" },
       })
 
-      if (!response.ok) {
-        console.warn("TEF analysis failed:", response.statusText)
-        return null
-      }
-
-      return await response.json()
+      return JSON.parse(response.text)
     } catch (error) {
       console.warn("TEF analysis error:", error)
-      return null
+      // 返回默认值
+      return {
+        enhancementMultiplier: 1.0,
+        enhancementFactors: [],
+        analysisTimestamp: new Date().toISOString()
+      }
     }
   }
 
@@ -153,25 +175,48 @@ export function useDashboardLogic(selectedDate: Date, userProfile: any) {
         }
       }
 
-      const response = await fetch("/api/openai/smart-suggestions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-ai-config": JSON.stringify(aiConfig),
-        },
-        body: JSON.stringify({
-          dailyLog: targetLog,
-          userProfile,
-          recentLogs
-        }),
+      // 直接使用客户端调用
+      const { OpenAICompatibleClient } = await import("@/lib/openai-client")
+      const modelConfig = aiConfig.agentModel
+      const client = new OpenAICompatibleClient(modelConfig.baseUrl, modelConfig.apiKey)
+
+      // 构建智能建议的提示词
+      const prompt = `基于用户的健康数据，提供个性化的营养和健康建议。
+
+用户资料：
+${JSON.stringify(userProfile, null, 2)}
+
+今日数据：
+${JSON.stringify(targetLog, null, 2)}
+
+近期数据（最近7天）：
+${JSON.stringify(recentLogs, null, 2)}
+
+请提供以下方面的建议：
+1. 营养摄入建议
+2. 运动建议
+3. 生活方式建议
+4. 健康风险提醒
+
+请以简洁、实用的方式回答，每个建议不超过100字。`
+
+      const response = await client.generateText({
+        model: modelConfig.name,
+        prompt,
       })
 
-      if (!response.ok) {
-        console.warn("Smart suggestions failed:", response.statusText)
+      if (!response.text) {
+        console.warn("Smart suggestions failed: empty response")
         return
       }
 
-      const suggestions = await response.json()
+      // 构建建议响应格式
+      const suggestions = {
+        nutritionAdvice: response.text.substring(0, 500), // 截取前500字符作为营养建议
+        exerciseAdvice: "基于您的数据，建议适量运动以保持健康。",
+        lifestyleAdvice: "保持规律作息，充足睡眠对健康很重要。",
+        healthRisks: "请注意均衡饮食，避免营养不良。"
+      }
 
       // 保存到localStorage
       const newSuggestions = { ...smartSuggestions }

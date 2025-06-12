@@ -55,36 +55,71 @@ export function AgentAdvice({ dailyLog, userProfile, aiConfig }: AgentAdviceProp
     setAdvice("")
 
     try {
-      const response = await fetch("/api/openai/advice-stream", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-ai-config": JSON.stringify(aiConfig),
-        },
-        body: JSON.stringify({
-          dailyLog,
-          userProfile,
-        }),
-        signal: abortControllerRef.current.signal,
+      // 直接使用客户端调用
+      const { OpenAICompatibleClient } = await import("@/lib/openai-client")
+      const modelConfig = aiConfig.agentModel
+      const client = new OpenAICompatibleClient(modelConfig.baseUrl, modelConfig.apiKey)
+
+      // 构建建议提示词
+      const prompt = `作为专业的健康顾问，基于用户的健康数据提供个性化建议。
+
+用户资料：
+${JSON.stringify(userProfile, null, 2)}
+
+今日健康数据：
+${JSON.stringify(dailyLog, null, 2)}
+
+请提供以下方面的专业建议：
+1. 营养摄入分析和建议
+2. 运动计划建议
+3. 生活方式改善建议
+4. 健康风险评估和预防
+
+请用温和、专业的语气，提供具体可行的建议。每个建议都要有科学依据。`
+
+      // 使用流式响应
+      const response = await client.streamText({
+        model: modelConfig.name,
+        messages: [{ role: "user", content: prompt }],
       })
-      
+
       if (!response.ok) {
         throw new Error(`获取建议失败: ${response.statusText || response.status}`)
       }
       if (!response.body) {
         throw new Error("响应体为空")
       }
-      
+
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
-      
+
       try {
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
-          
+
           const chunk = decoder.decode(value, { stream: true })
-          setAdvice((prev) => prev + chunk)
+
+          // 解析SSE格式的数据
+          const lines = chunk.split('\n')
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6)
+              if (data === '[DONE]') {
+                setIsStreaming(false)
+                return
+              }
+              try {
+                const parsed = JSON.parse(data)
+                const content = parsed.choices?.[0]?.delta?.content
+                if (content) {
+                  setAdvice((prev) => prev + content)
+                }
+              } catch (e) {
+                // 忽略解析错误
+              }
+            }
+          }
         }
       } finally {
         reader.releaseLock()

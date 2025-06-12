@@ -3,6 +3,8 @@
 [![GitHub license](https://img.shields.io/github/license/Feather-2/SnapFit-AI?style=flat-square)](https://github.com/Feather-2/SnapFit-AI/blob/main/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/Feather-2/SnapFit-AI?style=social)](https://github.com/Feather-2/SnapFit-AI/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/Feather-2/SnapFit-AI?style=social)](https://github.com/Feather-2/SnapFit-AI/network/members)
+[![Build APK](https://github.com/danmo-tyc/SnapFit-AI/workflows/🚀%20Build%20SnapFit%20AI%20Android%20APK/badge.svg)](https://github.com/danmo-tyc/SnapFit-AI/actions)
+[![Quick Build](https://github.com/danmo-tyc/SnapFit-AI/workflows/⚡%20Quick%20Build%20APK/badge.svg)](https://github.com/danmo-tyc/SnapFit-AI/actions)
 
 ---
 社区版：
@@ -39,6 +41,22 @@ SnapFit-AI 旨在通过一套直观而强大的工具赋能用户：
 3.  **超个性化AI私教 (Hyper-Personalized AI Coaching)**
     *   **深度健康档案**：通过可选的**专业模式**，您可以建立一份详尽的**健康档案**（涵盖疾病、过敏、用药、家族史等）。这份档案是AI提供精准、安全建议的基石。
     *   **动态记忆与专家会诊**：AI助手拥有**独立的动态记忆**，能在与您的交流中学习和更新关键信息。您可以启用**多位AI专家**（如营养师、健身教练、心理顾问），他们共享您的健康数据和记忆，提供**多视角的“专家会诊”**，帮助您更深入地了解自己，获得真正量身定制的指导。
+
+## 📱 Android APK 下载
+
+🚀 **[点击这里下载最新 APK](https://github.com/danmo-tyc/SnapFit-AI/releases/latest)**
+
+### 🔧 构建选项
+
+- **🚀 GitHub Actions 自动构建** (推荐): [查看构建指南](GITHUB-BUILD-GUIDE.md)
+- **💻 本地构建**: [查看本地构建指南](APK-BUILD-GUIDE.md)
+- **⚡ 快速构建**: 在 [Actions 页面](https://github.com/danmo-tyc/SnapFit-AI/actions) 手动触发
+
+### 📋 APK 信息
+- **应用名称**: SnapFit AI
+- **包名**: com.snapfit.ai
+- **最低 Android 版本**: 5.1 (API Level 22)
+- **功能**: 完整的健康管理和 AI 功能
 
 ## 在线演示
 
