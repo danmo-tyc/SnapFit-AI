@@ -56,7 +56,7 @@ const nextConfig = {
   },
 
   // Webpack 优化
-  webpack: (config, { dev, isServer }) => {
+  webpack: (config, { dev, isServer, webpack }) => {
     // 处理浏览器特定的模块
     if (isServer) {
       config.resolve.fallback = {
@@ -69,7 +69,7 @@ const nextConfig = {
 
       // 添加全局变量polyfill
       config.plugins.push(
-        new config.webpack.DefinePlugin({
+        new webpack.DefinePlugin({
           'self': 'globalThis',
           'window': 'globalThis',
           'document': 'undefined',
@@ -78,92 +78,19 @@ const nextConfig = {
       )
     }
 
-    // 生产环境优化
+    // 简化的生产环境优化（避免与 output: 'export' 冲突）
     if (!dev) {
+      // 基本优化，避免复杂的分包策略
       config.optimization = {
         ...config.optimization,
-        // 启用模块连接
-        concatenateModules: true,
-        // 优化重复模块
-        mergeDuplicateChunks: true,
-        // 移除空的 chunks
-        removeEmptyChunks: true,
-      }
-
-      // 分包策略
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-            priority: 10,
-          },
-          ui: {
-            test: /[\\/]components[\\/]ui[\\/]/,
-            name: 'ui',
-            chunks: 'all',
-            priority: 20,
-          },
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
-            priority: 5,
-            reuseExistingChunk: true,
-          },
-        },
+        minimize: true,
       }
     }
 
     return config
   },
 
-  // 头部优化
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-        ],
-      },
-      {
-        source: '/api/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store, max-age=0',
-          },
-        ],
-      },
-      {
-        source: '/_next/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ]
-  },
+  // 注意：headers 在 output: 'export' 模式下不工作，所以移除了
 }
 
 export default withNextIntl(nextConfig);
