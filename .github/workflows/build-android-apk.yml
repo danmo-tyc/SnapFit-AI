@@ -101,7 +101,11 @@ jobs:
 
     - name: 🔄 Sync Capacitor
       run: |
-        npx cap sync android
+        echo "🔄 Syncing Capacitor..."
+        npx cap sync android --verbose
+        echo "✅ Capacitor sync completed"
+        echo "📁 Checking android directory after sync:"
+        ls -la android/app/src/main/
         
     - name: 🛠️ Grant Execute Permission
       run: |
@@ -133,11 +137,16 @@ jobs:
       run: |
         cd android
         echo "🧹 Cleaning previous builds..."
-        ./gradlew clean --no-daemon --stacktrace
+        ./gradlew clean --no-daemon --stacktrace || echo "Clean failed but continuing..."
         echo "📋 Gradle version info:"
         ./gradlew --version
-        echo "🚀 Building APK..."
-        ./gradlew assembleDebug --no-daemon --stacktrace
+        echo "🔍 Checking Gradle wrapper..."
+        ls -la gradlew*
+        echo "📱 Checking Android SDK..."
+        echo $ANDROID_HOME
+        ls -la $ANDROID_HOME/platforms/ || echo "No platforms found"
+        echo "🚀 Building APK with detailed logging..."
+        ./gradlew assembleDebug --no-daemon --stacktrace --info --warning-mode all
         
     - name: 📋 List APK Files
       run: |
