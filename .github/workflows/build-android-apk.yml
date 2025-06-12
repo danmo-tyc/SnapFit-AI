@@ -85,7 +85,19 @@ jobs:
         </html>
         EOF
         fi
-        
+
+    - name: 🔧 Install Capacitor
+      run: |
+        npm install @capacitor/core @capacitor/cli @capacitor/android
+
+    - name: 🔧 Initialize Capacitor
+      run: |
+        npx cap init "SnapFit AI" "com.snapfit.ai" --web-dir=out
+
+    - name: 📱 Add Android Platform
+      run: |
+        npx cap add android
+
     - name: 🔄 Sync Capacitor
       run: |
         npx cap sync android
@@ -94,10 +106,20 @@ jobs:
       run: |
         chmod +x android/gradlew
         
+    - name: 🔧 Configure Gradle
+      run: |
+        cd android
+        echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> gradle.properties
+        echo "org.gradle.parallel=true" >> gradle.properties
+        echo "org.gradle.caching=true" >> gradle.properties
+        echo "android.useAndroidX=true" >> gradle.properties
+        echo "android.enableJetifier=true" >> gradle.properties
+
     - name: 📱 Build Debug APK
       run: |
         cd android
-        ./gradlew assembleDebug --no-daemon --stacktrace
+        ./gradlew clean
+        ./gradlew assembleDebug --no-daemon --stacktrace --info
         
     - name: 📋 List APK Files
       run: |
