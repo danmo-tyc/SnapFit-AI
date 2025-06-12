@@ -90,10 +90,6 @@ jobs:
       run: |
         npm install @capacitor/core @capacitor/cli @capacitor/android --force --legacy-peer-deps
 
-    - name: 🔧 Initialize Capacitor
-      run: |
-        npx cap init "SnapFit AI" "com.snapfit.ai" --web-dir=out
-
     - name: 📱 Add Android Platform
       run: |
         npx cap add android
