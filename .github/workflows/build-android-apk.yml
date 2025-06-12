@@ -99,6 +99,26 @@ jobs:
           echo "Android platform already exists, skipping add step"
         fi
 
+    - name: 🏗️ Build Next.js App
+      run: |
+        echo "🏗️ Building Next.js application..."
+        npm run build
+        echo "✅ Next.js build completed"
+
+    - name: 🔍 Check Build Output
+      run: |
+        echo "📁 Checking build output..."
+        if [ ! -d "out" ]; then
+          echo "❌ 'out' directory not found after build!"
+          echo "📋 Available directories:"
+          ls -la
+          exit 1
+        fi
+        echo "📋 Contents of out directory:"
+        ls -la out/
+        echo "📏 Build output size:"
+        du -sh out/
+
     - name: 🔄 Sync Capacitor
       run: |
         echo "🔄 Syncing Capacitor..."
